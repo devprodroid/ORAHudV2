@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">ORAHudClient</string>
+
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="btn_bt_connect">Connect</string>
+    <string name="btn_stop_server">Stop server</string>
+</resources>

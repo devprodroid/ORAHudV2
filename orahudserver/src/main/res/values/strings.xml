@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">ORAHudServer</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="pick_server">Pick BT Server</string>
+    <string name="refresh">Refresh</string>
+    <string name="title_activity_control">ControlActivity</string>
+
+</resources>

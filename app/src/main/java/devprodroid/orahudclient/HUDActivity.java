@@ -2,10 +2,14 @@ package devprodroid.orahudclient;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
@@ -19,7 +23,7 @@ import devprodroid.orahudclient.util.SystemUiHider;
 /**
  * Connection Activity displaying a HUD on the ORA
  */
-public class HUDActivity extends Activity  {
+public class HUDActivity extends Activity {
 
 
     private static final int TOAST_DURATION = Toast.LENGTH_SHORT;
@@ -55,8 +59,16 @@ public class HUDActivity extends Activity  {
      */
     private SystemUiHider mSystemUiHider;
 
+    /**
+     * The Instance of DataModel containing the displayed Data
+     */
+    public final DataModel dataModel;
 
     Intent serviceIntent;
+
+    public HUDActivity() {
+        dataModel = new DataModel();
+    }
 
 
     @Override
@@ -67,6 +79,10 @@ public class HUDActivity extends Activity  {
 
         final View controlsView = findViewById(R.id.fullscreen_content_controls);
         final View contentView = findViewById(R.id.fullscreen_content);
+
+
+        serviceIntent = new Intent(this, BT_Service.class);
+
 
         // Set up an instance of SystemUiHider to control the system UI for
         // this activity.
@@ -155,10 +171,11 @@ public class HUDActivity extends Activity  {
                 }
 
                 // Start the service
-                serviceIntent = new Intent(this, BT_Service.class);
+                //serviceIntent = new Intent(this, BT_Service.class);
                 serviceIntent.putExtra(BTServerService.MSG_SERVER_NAME,
                         serv_name);
                 serviceIntent.putExtra(BTServerService.MSG_BT_UUID, serv_UUID);
+
                 startService(serviceIntent);
 
                 // Change button form.
@@ -169,8 +186,7 @@ public class HUDActivity extends Activity  {
                     stopService(serviceIntent);
                     serviceIntent = null;
                     btn_start.setText(R.string.btn_bt_connect);
-                }
-                catch (NullPointerException E){
+                } catch (NullPointerException E) {
                     showError("Service not running");
                 }
             }
@@ -187,6 +203,42 @@ public class HUDActivity extends Activity  {
         // created, to briefly hint to the user that UI controls
         // are available.
         delayedHide(100);
+    }
+
+    /**
+     * Receive messages from the BTService containing the Data from the Drone
+     */
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            updateUI(intent);
+        }
+    };
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        registerReceiver(broadcastReceiver, new IntentFilter(BT_Service.BROADCAST_ACTION));
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        unregisterReceiver(broadcastReceiver);
+        //stopService(intent);
+    }
+
+
+    private void updateUI(Intent intent) {
+
+
+        String counter = intent.getStringExtra("counter");
+        String time = intent.getStringExtra("time");
+        Log.d(serv_name, counter);
+        Log.d(serv_name, time);
     }
 
 
@@ -231,4 +283,6 @@ public class HUDActivity extends Activity  {
             }
         });
     }
+
+
 }

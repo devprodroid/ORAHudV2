@@ -17,7 +17,6 @@ import java.io.IOException;
 import java.util.UUID;
 
 import de.yadrone.base.IARDrone;
-import de.yadrone.base.command.LEDAnimation;
 import de.yadrone.base.navdata.AttitudeListener;
 import devprodroid.bluetooth.BTClient;
 import devprodroid.bluetooth.BTMessage;
@@ -27,7 +26,7 @@ import devprodroid.bluetooth.BTSocketListener;
 /**
  * This Activity displays Control interface and informations for the droneii
  */
-public class ControlActivity extends AppCompatActivity implements  BTSocketListener.Callback, AttitudeListener {
+public class ControlActivity extends AppCompatActivity implements BTSocketListener.Callback, AttitudeListener {
 
 
     private final String TAG = getClass().getPackage().getName();
@@ -84,25 +83,12 @@ public class ControlActivity extends AppCompatActivity implements  BTSocketListe
                     Log.e(TAG, e.getMessage(), e);
                     finish();
                 }
-            };
+            }
+
+            ;
         }.start();
 
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -125,7 +111,6 @@ public class ControlActivity extends AppCompatActivity implements  BTSocketListe
 
         return super.onOptionsItemSelected(item);
     }
-
 
 
     public void onResume() {
@@ -154,8 +139,11 @@ public class ControlActivity extends AppCompatActivity implements  BTSocketListe
 
 //                if (connected) {
 //                    try {
+//                        BTMessage msg = new BTMessage();
+//                        msg.setMsgType((byte)4);
+//                        msg.setPayload(new byte[0]);
 //
-//                        //client.sendMessage("huhu");
+//                        client.sendMessage(msg);
 //                } catch (IOException E) {
 //                        E.printStackTrace();
 //
@@ -179,10 +167,22 @@ public class ControlActivity extends AppCompatActivity implements  BTSocketListe
      * @param v
      */
     public void onBtnClicked(View v) {
-        YADroneApplication app = (YADroneApplication)getApplication();
-        final IARDrone drone = app.getARDrone();
-        drone.getCommandManager().setLedsAnimation(LEDAnimation.BLINK_ORANGE, 3, 10);
+      //  YADroneApplication app = (YADroneApplication) getApplication();
+      //  final IARDrone drone = app.getARDrone();
+      //  drone.getCommandManager().setLedsAnimation(LEDAnimation.BLINK_ORANGE, 3, 10);
 
+        if (connected) {
+            try {
+                BTMessage msg = new BTMessage();
+                msg.setMsgType((byte) 4);
+                msg.setPayload(new byte[0]);
+
+                client.sendMessage(msg);
+            } catch (IOException E) {
+                E.printStackTrace();
+
+            }
+        }
     }
 
 
@@ -201,6 +201,7 @@ public class ControlActivity extends AppCompatActivity implements  BTSocketListe
         showMsg("Disconnected from server.");
         finish();
     }
+
     private void showMsg(final String msg) {
         runOnUiThread(new Runnable() {
             @Override
@@ -211,10 +212,7 @@ public class ControlActivity extends AppCompatActivity implements  BTSocketListe
     }
 
     @Override
-    public void onDestroy()
-    {
-
-
+    public void onDestroy() {
         if (client != null) {
             client.close();
         }

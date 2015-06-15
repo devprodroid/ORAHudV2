@@ -33,6 +33,21 @@
             android:text="Connect"
             android:id="@+id/btn_bt_connect"
             android:layout_gravity="center" />
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/imageButton"
+            android:layout_gravity="center" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="Empty"
+            android:id="@+id/tvText"
+            android:layout_gravity="center_horizontal|top"
+            android:textSize="@dimen/abc_text_size_large_material" />
     </FrameLayout>
 
 </FrameLayout>

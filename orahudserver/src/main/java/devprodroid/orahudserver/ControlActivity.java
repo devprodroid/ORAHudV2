@@ -175,7 +175,13 @@ public class ControlActivity extends AppCompatActivity implements BTSocketListen
             try {
                 BTMessage msg = new BTMessage();
                 msg.setMsgType((byte) 4);
-                msg.setPayload(new byte[0]);
+
+
+                String s = "sa Message";
+                byte[] b = s.getBytes("UTF-8");
+
+
+                msg.setPayload(b);
 
                 client.sendMessage(msg);
             } catch (IOException E) {

@@ -13,8 +13,10 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.UnsupportedEncodingException;
 import java.util.UUID;
 
 import devprodroid.bluetooth.BTServerService;
@@ -237,8 +239,21 @@ public class HUDActivity extends Activity {
 
         String counter = intent.getStringExtra("counter");
         String time = intent.getStringExtra("time");
+
+        byte[] message = intent.getByteArrayExtra("msg");
+
+
+
         Log.d(serv_name, counter);
         Log.d(serv_name, time);
+        final TextView tvText = (TextView) findViewById(R.id.tvText);
+        String s = null;
+        try {
+            s = new String(message, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        tvText.setText(s);
     }
 
 

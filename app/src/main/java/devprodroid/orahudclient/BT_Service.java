@@ -97,6 +97,8 @@ public class BT_Service extends BTServerService {
             case 4: //notify activity ! wohooo
                 intent.putExtra("time", new Date().toLocaleString());
                 intent.putExtra("counter", String.valueOf(++counter));
+                intent.putExtra("msg", payload);
+
                 sendBroadcast(intent);
 
                 break;

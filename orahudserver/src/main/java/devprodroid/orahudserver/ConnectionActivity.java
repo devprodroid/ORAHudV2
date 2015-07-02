@@ -52,7 +52,7 @@ public class ConnectionActivity extends AppCompatActivity {
 
         initializeWifi();
 
-        initializeDrone();
+        //initializeDrone();
     }
 
     private void initializeWifi() {
@@ -241,8 +241,7 @@ public class ConnectionActivity extends AppCompatActivity {
             RefreshDeviceList();
         }
         if (v.getId() == R.id.btnDrone) {
-
-            startControlActivity();
+                initializeDrone();
         }
     }
 

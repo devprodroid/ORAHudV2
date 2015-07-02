@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,7 +39,11 @@ public class ControlActivity extends AppCompatActivity implements BTSocketListen
     private BluetoothDevice device;
 
     private BTClient client;
+    private boolean btSending =false;
     private ProgressDialog mProgressDialog;
+
+    private TextView tvText;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +57,15 @@ public class ControlActivity extends AppCompatActivity implements BTSocketListen
         Intent act_param = this.getIntent();
         final String macBTDeviceAddress = act_param.getStringExtra(MSG_MAC_BT_DEVICE_ADDRESS);
         final UUID serv_UUID = UUID.fromString(act_param.getStringExtra(MSG_BT_UUID));
+
+
+        tvText = (TextView) findViewById(R.id.text_navdata);
+
+
+
+
+
+
         //retrieve the bt device
         for (BluetoothDevice d : ba.getBondedDevices()) {
             if (d.getAddress().equals(macBTDeviceAddress)) {
@@ -119,6 +133,7 @@ public class ControlActivity extends AppCompatActivity implements BTSocketListen
         YADroneApplication app = (YADroneApplication) getApplication();
         IARDrone drone = app.getARDrone();
         drone.getNavDataManager().addAttitudeListener(this);
+
     }
 
     public void onPause() {
@@ -127,31 +142,38 @@ public class ControlActivity extends AppCompatActivity implements BTSocketListen
         YADroneApplication app = (YADroneApplication) getApplication();
         IARDrone drone = app.getARDrone();
         drone.getNavDataManager().removeAttitudeListener(this);
+
     }
 
     public void attitudeUpdated(final float pitch, final float roll, final float yaw) {
-        final TextView text = (TextView) findViewById(R.id.text_navdata);
-
-        runOnUiThread(new Runnable() {
-            public void run() {
-                text.setText("Pitch: " + pitch + " Roll: " + roll + " Yaw: " + yaw);
 
 
-//                if (connected) {
-//                    try {
-//                        BTMessage msg = new BTMessage();
-//                        msg.setMsgType((byte)4);
-//                        msg.setPayload(new byte[0]);
-//
-//                        client.sendMessage(msg);
-//                } catch (IOException E) {
-//                        E.printStackTrace();
-//
-//                }
-//                }
+        if (!btSending) {
 
-            }
-        });
+                    btSending=true;
+                    Log.e(TAG, "Sending");
+                    String s = "Roll: " + roll ;
+                    try {
+                        byte[] b = s.getBytes("UTF-8");
+
+                        if (connected) {
+
+                            BTMessage msg = new BTMessage();
+                            msg.setMsgType((byte) 4);
+                            msg.setPayload(b);
+
+                            client.sendMessage(msg);
+                        }
+                    } catch (IOException E) {
+                        Log.e(TAG, E.getMessage(), E);
+
+                    }
+                    finally {
+                        btSending=false;
+                    }
+
+
+        }
     }
 
     public void attitudeUpdated(float arg0, float arg1) {
@@ -167,17 +189,21 @@ public class ControlActivity extends AppCompatActivity implements BTSocketListen
      * @param v
      */
     public void onBtnClicked(View v) {
-      //  YADroneApplication app = (YADroneApplication) getApplication();
-      //  final IARDrone drone = app.getARDrone();
-      //  drone.getCommandManager().setLedsAnimation(LEDAnimation.BLINK_ORANGE, 3, 10);
+        //  YADroneApplication app = (YADroneApplication) getApplication();
+        //  final IARDrone drone = app.getARDrone();
+        //  drone.getCommandManager().setLedsAnimation(LEDAnimation.BLINK_ORANGE, 3, 10);
 
+        sendMessage();
+    }
+
+    private void sendMessage() {
         if (connected) {
             try {
                 BTMessage msg = new BTMessage();
                 msg.setMsgType((byte) 4);
 
-
-                String s = "sa Message";
+                final EditText input = (EditText) findViewById(R.id.inputMessage);
+                String s = String.valueOf(input.getText());
                 byte[] b = s.getBytes("UTF-8");
 
 

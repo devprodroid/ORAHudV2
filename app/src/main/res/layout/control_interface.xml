@@ -3,23 +3,34 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center"
+    android:background="#0099cc"
     android:id="@+id/control_interface"
 
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:weightSum="1">
 
-    <TextView
-        android:id="@+id/tv1"
+    <RelativeLayout
         android:layout_width="fill_parent"
-        android:layout_height="123dp"
-        android:layout_gravity="center_horizontal|bottom"
-        android:text="Initial"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textSize="@dimen/abc_text_size_display_2_material" />
+        android:layout_height="fill_parent"
+        android:layout_weight="0.49">
 
-    <Button
-        android:id="@+id/btn_bt_connect"
-        style="?metaButtonBarButtonStyle"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/dummy_button" />
+        <TextView
+            android:id="@+id/tv1"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Initial"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textSize="@dimen/abc_text_size_display_2_material"
+            android:layout_weight="0.49" />
+
+        <Button
+            android:id="@+id/btn_bt_connect"
+            style="?metaButtonBarButtonStyle"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/btn_bt_start"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentStart="true" />
+    </RelativeLayout>
+
 </LinearLayout>

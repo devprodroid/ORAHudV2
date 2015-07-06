@@ -16,7 +16,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
-import java.io.UnsupportedEncodingException;
 import java.util.UUID;
 
 import devprodroid.bluetooth.BTServerService;
@@ -307,25 +306,28 @@ public class HUDActivity extends Activity {
         // stopService(serviceIntent);
     }
 
-
+    public static int byteArrayToInt(byte[] b)
+    {
+        return   b[3] & 0xFF |
+                (b[2] & 0xFF) << 8 |
+                (b[1] & 0xFF) << 16 |
+                (b[0] & 0xFF) << 24;
+    }
+    /**
+     * Modify ui according to recieved bluetoth messages
+     * @param intent
+     */
     private void updateUI(Intent intent) {
 
+        byte[] eventType = intent.getByteArrayExtra("eventType");
+        byte[] message = intent.getByteArrayExtra("payload");
 
-        String counter = intent.getStringExtra("counter");
-        String time = intent.getStringExtra("time");
+        Integer inByte =byteArrayToInt(message);
 
-        byte[] message = intent.getByteArrayExtra("msg");
-
-        Log.d(serv_name, counter);
-        Log.d(serv_name, time);
         final TextView tvText = (TextView) findViewById(R.id.tv2);
-        String s = null;
-        try {
-            s = new String(message, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        tvText.setText(s);
+
+
+        tvText.setText(inByte.toString());
     }
 
 
@@ -360,6 +362,8 @@ public class HUDActivity extends Activity {
 //        mHideHandler.removeCallbacks(mHideRunnable);
 //        mHideHandler.postDelayed(mHideRunnable, delayMillis);
 //    }
+
+
     public void showError(final String msg) {
         runOnUiThread(new Runnable() {
             @Override

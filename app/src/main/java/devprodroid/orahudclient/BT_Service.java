@@ -8,8 +8,6 @@ import android.content.Intent;
 import android.os.Handler;
 import android.util.Log;
 
-import java.util.Date;
-
 import devprodroid.bluetooth.BTMessage;
 import devprodroid.bluetooth.BTServerService;
 import devprodroid.bluetooth.Event;
@@ -95,9 +93,11 @@ public class BT_Service extends BTServerService {
         switch (eventType) {
 
             case 4: //notify activity ! wohooo
-                intent.putExtra("time", new Date().toLocaleString());
-                intent.putExtra("counter", String.valueOf(++counter));
-                intent.putExtra("msg", payload);
+                //intent.putExtra("time", new Date().toLocaleString());
+               // intent.putExtra("counter", String.valueOf(++counter));
+                intent.putExtra("payload", payload);
+
+                intent.putExtra("eventType", eventType);
 
                 sendBroadcast(intent);
 

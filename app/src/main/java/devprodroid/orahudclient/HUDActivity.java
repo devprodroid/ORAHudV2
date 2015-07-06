@@ -1,6 +1,8 @@
 package devprodroid.orahudclient;
 
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -29,6 +31,8 @@ public class HUDActivity extends Activity {
     private static final int TOAST_DURATION = Toast.LENGTH_SHORT;
     private static final String serv_UUID = "07419c1a-090c-11e5-a6c0-1697f925ec7b";
     private static final String serv_name = "ORA Server";
+
+    private static final int REQUEST_ENABLE_BT = 1;
 
 
     private ViewFlipper viewFlipper;
@@ -83,9 +87,11 @@ public class HUDActivity extends Activity {
         viewFlipper = (ViewFlipper) findViewById(R.id.viewFlipper);
 
 
-       // final View controlsView = findViewById(R.id.btn_bt_connect);
-       // final View contentView = findViewById(R.id.main_layout);
+        // final View controlsView = findViewById(R.id.btn_bt_connect);
+        // final View contentView = findViewById(R.id.main_layout);
         serviceIntent = new Intent(this, BT_Service.class);
+
+        isBluetoothAvailable();
 
 
         // Set up an instance of SystemUiHider to control the system UI for
@@ -164,10 +170,10 @@ public class HUDActivity extends Activity {
     private void onStartBtnClicked(View v) {
         if (v.getId() == R.id.btn_bt_connect) {
 
-            viewFlipper.showNext();
+            //viewFlipper.showNext();
             Button btn_start = ((Button) findViewById(R.id.btn_bt_connect));
 
-            if (btn_start.getText().toString().compareTo("Stop server") != 0) {
+            if (btn_start.getText().toString().compareTo(getResources().getString(R.string.btn_bt_stop)) != 0) {
                 //Service is stopped.
                 // Check the UUID
                 try {
@@ -178,13 +184,18 @@ public class HUDActivity extends Activity {
                 }
 
                 // Start the service
-                startBTService();
+                try {
+                    startBTService();
+                } catch (Exception e) {
 
+                    showError("Bluetooth not running");
+
+                }
             } else {
                 try {
                     stopService(serviceIntent);
                     serviceIntent = null;
-                    btn_start.setText(R.string.btn_bt_connect);
+                    btn_start.setText(R.string.btn_bt_start);
                 } catch (NullPointerException E) {
                     showError("Service not running");
                 }
@@ -247,11 +258,16 @@ public class HUDActivity extends Activity {
                 serv_name);
         serviceIntent.putExtra(BTServerService.MSG_BT_UUID, serv_UUID);
 
-        startService(serviceIntent);
+        if (isBluetoothAvailable()) {
+            startService(serviceIntent);
+        }
 
-        // Change button form.
-        Button btn_start = ((Button) findViewById(R.id.btn_bt_connect));
-        btn_start.setText(getString(R.string.btn_stop_server));
+
+        if (isBtServiceRunning()) {
+            // Change button form.
+            Button btn_start = ((Button) findViewById(R.id.btn_bt_connect));
+            btn_start.setText(getString(R.string.btn_bt_stop));
+        }
     }
 
 
@@ -280,6 +296,7 @@ public class HUDActivity extends Activity {
     @Override
     public void onResume() {
         super.onResume();
+
         registerReceiver(broadcastReceiver, new IntentFilter(BT_Service.BROADCAST_ACTION));
     }
 
@@ -343,8 +360,6 @@ public class HUDActivity extends Activity {
 //        mHideHandler.removeCallbacks(mHideRunnable);
 //        mHideHandler.postDelayed(mHideRunnable, delayMillis);
 //    }
-
-
     public void showError(final String msg) {
         runOnUiThread(new Runnable() {
             @Override
@@ -352,6 +367,46 @@ public class HUDActivity extends Activity {
                 Toast.makeText(HUDActivity.this, msg, TOAST_DURATION).show();
             }
         });
+    }
+
+    /**
+     * @param serviceClass
+     * @return Background service running
+     * http://stackoverflow.com/questions/600207/how-to-check-if-a-service-is-running-on-android
+     * Peter Mortensen
+     */
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    public boolean isBtServiceRunning() {
+        return isMyServiceRunning(BT_Service.class);
+    }
+
+    public boolean isBluetoothAvailable() {
+        BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
+        if (mBluetoothAdapter == null) {
+            Log.e("BTDeviceDiscover", "No bluetooth adapter detected/available.");
+        return false;
+        }
+        //Check if bluetooth is enabled.
+        if (!mBluetoothAdapter.isEnabled())
+        {
+            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+
+            Log.e("BTDeviceDiscover", "Bluetooth is DISABLED. Asking the user");
+            return false;
+        }
+        return true;
     }
 
 

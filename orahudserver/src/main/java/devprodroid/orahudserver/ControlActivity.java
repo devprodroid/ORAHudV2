@@ -9,12 +9,17 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.View.OnTouchListener;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.UUID;
 
 import de.yadrone.base.IARDrone;
@@ -61,48 +66,193 @@ public class ControlActivity extends AppCompatActivity implements BTSocketListen
 
         tvText = (TextView) findViewById(R.id.text_navdata);
 
+       initButtons();
 
 
 
-
-
-        //retrieve the bt device
-        for (BluetoothDevice d : ba.getBondedDevices()) {
-            if (d.getAddress().equals(macBTDeviceAddress)) {
-                device = d;
-                break;
-            }
-        }
-        if (device == null) {
-            throw new IllegalArgumentException();
-        }
-
-        //Progress dialog
-        mProgressDialog = ProgressDialog.show(this, "Please wait",
-                "Trying to connect to \"" + device.getName() + "\"", true);
-
-        //Connection thread
-        new Thread("Client creation") {
-            public void run() {
-                try {
-                    client = new BTClient(ControlActivity.this, ControlActivity.this, device, serv_UUID);
-
-                    //connection successfull
-                    connected = true;
-                    mProgressDialog.dismiss();
-                    showMsg("Connection successful!");
-
-                } catch (IOException e) {
-                    showMsg(e.getMessage());
-                    Log.e(TAG, e.getMessage(), e);
-                    finish();
+        if (true) {
+            //retrieve the bt device
+            for (BluetoothDevice d : ba.getBondedDevices()) {
+                if (d.getAddress().equals(macBTDeviceAddress)) {
+                    device = d;
+                    break;
                 }
             }
+            if (device == null) {
+                throw new IllegalArgumentException();
+            }
 
-            ;
-        }.start();
+            //Progress dialog
+            mProgressDialog = ProgressDialog.show(this, "Please wait",
+                    "Trying to connect to \"" + device.getName() + "\"", true);
+
+            //Connection thread
+            new Thread("Client creation") {
+                public void run() {
+                    try {
+                        client = new BTClient(ControlActivity.this, ControlActivity.this, device, serv_UUID);
+
+                        //connection successfull
+                        connected = true;
+                        mProgressDialog.dismiss();
+                        showMsg("Connection successful!");
+
+                    } catch (IOException e) {
+                        showMsg(e.getMessage());
+                        Log.e(TAG, e.getMessage(), e);
+                        finish();
+                    }
+                }
+
+                ;
+            }.start();
+        }
 
     }
+
+    private void initButtons()
+    {
+        YADroneApplication app = (YADroneApplication)getApplication();
+        final IARDrone drone = app.getARDrone();
+
+        Button forward = (Button)findViewById(R.id.cmd_forward);
+        forward.setOnTouchListener(new OnTouchListener() {
+            public boolean onTouch(View v, MotionEvent event)
+            {
+                if(event.getAction() == MotionEvent.ACTION_DOWN)
+                    drone.getCommandManager().forward(20);
+                else if (event.getAction() == MotionEvent.ACTION_UP)
+                    drone.hover();
+
+                return true;
+            }
+        });
+
+        Button backward = (Button)findViewById(R.id.cmd_backward);
+        backward.setOnTouchListener(new OnTouchListener() {
+            public boolean onTouch(View v, MotionEvent event)
+            {
+                if(event.getAction() == MotionEvent.ACTION_DOWN)
+                    drone.getCommandManager().backward(20);
+                else if (event.getAction() == MotionEvent.ACTION_UP)
+                    drone.hover();
+
+                return true;
+            }
+        });
+
+
+        Button left = (Button)findViewById(R.id.cmd_left);
+        left.setOnTouchListener(new OnTouchListener() {
+            public boolean onTouch(View v, MotionEvent event)
+            {
+                if(event.getAction() == MotionEvent.ACTION_DOWN)
+                    drone.getCommandManager().goLeft(20);
+                else if (event.getAction() == MotionEvent.ACTION_UP)
+                    drone.hover();
+
+                return true;
+            }
+        });
+
+
+        Button right = (Button)findViewById(R.id.cmd_right);
+        right.setOnTouchListener(new OnTouchListener() {
+            public boolean onTouch(View v, MotionEvent event)
+            {
+                if(event.getAction() == MotionEvent.ACTION_DOWN)
+                    drone.getCommandManager().goRight(20);
+                else if (event.getAction() == MotionEvent.ACTION_UP)
+                    drone.hover();
+
+                return true;
+            }
+        });
+
+        Button up = (Button)findViewById(R.id.cmd_up);
+        up.setOnTouchListener(new OnTouchListener() {
+            public boolean onTouch(View v, MotionEvent event)
+            {
+                if(event.getAction() == MotionEvent.ACTION_DOWN)
+                    drone.getCommandManager().up(40);
+                else if (event.getAction() == MotionEvent.ACTION_UP)
+                    drone.hover();
+
+                return true;
+            }
+        });
+
+        Button down = (Button)findViewById(R.id.cmd_down);
+        down.setOnTouchListener(new OnTouchListener() {
+            public boolean onTouch(View v, MotionEvent event)
+            {
+                if(event.getAction() == MotionEvent.ACTION_DOWN)
+                    drone.getCommandManager().down(40);
+                else if (event.getAction() == MotionEvent.ACTION_UP)
+                    drone.hover();
+
+                return true;
+            }
+        });
+
+
+        Button spinLeft = (Button)findViewById(R.id.cmd_spin_left);
+        spinLeft.setOnTouchListener(new OnTouchListener() {
+            public boolean onTouch(View v, MotionEvent event)
+            {
+                if(event.getAction() == MotionEvent.ACTION_DOWN)
+                    drone.getCommandManager().spinLeft(20);
+                else if (event.getAction() == MotionEvent.ACTION_UP)
+                    drone.hover();
+
+                return true;
+            }
+        });
+
+
+        Button spinRight = (Button)findViewById(R.id.cmd_spin_right);
+        spinRight.setOnTouchListener(new OnTouchListener() {
+            public boolean onTouch(View v, MotionEvent event)
+            {
+                if(event.getAction() == MotionEvent.ACTION_DOWN)
+                    drone.getCommandManager().spinRight(20);
+                else if (event.getAction() == MotionEvent.ACTION_UP)
+                    drone.hover();
+
+                return true;
+            }
+        });
+
+        final Button landing = (Button)findViewById(R.id.cmd_landing);
+        landing.setOnClickListener(new OnClickListener() {
+            boolean isFlying = false;
+            public void onClick(View v)
+            {
+                if (!isFlying)
+                {
+                    drone.takeOff();
+                    landing.setText("Landing");
+                }
+                else
+                {
+                    drone.landing();
+                    landing.setText("Take Off");
+                }
+                isFlying = !isFlying;
+            }
+        });
+
+        Button emergency = (Button)findViewById(R.id.cmd_emergency);
+        emergency.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v)
+            {
+                drone.reset();
+            }
+        });
+    }
+
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -134,6 +284,10 @@ public class ControlActivity extends AppCompatActivity implements BTSocketListen
         IARDrone drone = app.getARDrone();
         drone.getNavDataManager().addAttitudeListener(this);
 
+
+
+
+
     }
 
     public void onPause() {
@@ -145,22 +299,31 @@ public class ControlActivity extends AppCompatActivity implements BTSocketListen
 
     }
 
+
+    public static byte [] float2ByteArray (float value)
+    {
+        return ByteBuffer.allocate(4).putFloat(value).array();
+    }
+
     public void attitudeUpdated(final float pitch, final float roll, final float yaw) {
 
 
         if (!btSending) {
 
                     btSending=true;
-                    Log.e(TAG, "Sending");
-                    String s = "Roll: " + roll ;
-                    try {
-                        byte[] b = s.getBytes("UTF-8");
 
-                        if (connected) {
+
+                    try {
+                          if (connected) {
+
+                              byte[] bytes =  intToByteArray(Math.round(roll));
+
+
+
 
                             BTMessage msg = new BTMessage();
                             msg.setMsgType((byte) 4);
-                            msg.setPayload(b);
+                            msg.setPayload(bytes);
 
                             client.sendMessage(msg);
                         }
@@ -182,6 +345,16 @@ public class ControlActivity extends AppCompatActivity implements BTSocketListen
     public void windCompensation(float arg0, float arg1) {
     }
 
+    public static byte[] intToByteArray(int a)
+    {
+        return new byte[] {
+                (byte) ((a >> 24) & 0xFF),
+                (byte) ((a >> 16) & 0xFF),
+                (byte) ((a >> 8) & 0xFF),
+                (byte) (a & 0xFF)
+        };
+    }
+
 
     /**
      * Callback for the refresh button.
@@ -190,11 +363,30 @@ public class ControlActivity extends AppCompatActivity implements BTSocketListen
      */
     public void onBtnClicked(View v) {
         //  YADroneApplication app = (YADroneApplication) getApplication();
-        //  final IARDrone drone = app.getARDrone();
+         // final IARDrone drone = app.getARDrone();
         //  drone.getCommandManager().setLedsAnimation(LEDAnimation.BLINK_ORANGE, 3, 10);
+        try {
+        //sendMessage();
+        //
+          byte[] bytes =  intToByteArray(215);
+        BTMessage msg = new BTMessage();
+        msg.setMsgType((byte) 4);
+        msg.setPayload(bytes);
 
-        sendMessage();
+        client.sendMessage(msg);
+        } catch (IOException E) {
+            Log.e(TAG, E.getMessage(), E);
+
+        }
+
+
     }
+
+
+
+
+
+
 
     private void sendMessage() {
         if (connected) {
@@ -255,4 +447,6 @@ public class ControlActivity extends AppCompatActivity implements BTSocketListen
 
         super.onDestroy();
     }
+
+
 }

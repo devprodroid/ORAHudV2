@@ -1,9 +1,6 @@
 package devprodroid.bluetooth;
 
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by Fernflower decompiler)
-//
+
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -83,4 +80,8 @@ public class BTMessage {
             throw new IOException("No payload");
         }
     }
+
+
+
+
 }

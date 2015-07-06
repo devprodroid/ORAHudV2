@@ -3,6 +3,7 @@
     android:id="@+id/hud_1"
     android:layout_height="fill_parent"
     android:gravity="center"
+    android:background="#0099cc"
     android:orientation="vertical">
 
     <TextView

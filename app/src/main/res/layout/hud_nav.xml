@@ -4,6 +4,7 @@
     android:gravity="center"
     android:id="@+id/hud_2"
     android:orientation="vertical"
+    android:background="#0099cc"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <TextView

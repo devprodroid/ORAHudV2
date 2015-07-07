@@ -320,7 +320,7 @@ public class ControlActivity extends AppCompatActivity implements BTSocketListen
 
 
                             BTMessage msg = new BTMessage();
-                            msg.setMsgType((byte) 4);
+
                             msg.setPayload(bytes);
 
                             client.sendMessage(msg);
@@ -363,19 +363,19 @@ public class ControlActivity extends AppCompatActivity implements BTSocketListen
         //  YADroneApplication app = (YADroneApplication) getApplication();
          // final IARDrone drone = app.getARDrone();
         //  drone.getCommandManager().setLedsAnimation(LEDAnimation.BLINK_ORANGE, 3, 10);
-        try {
-        //sendMessage();
-        //
-          byte[] bytes =  intToByteArray(215);
-        BTMessage msg = new BTMessage();
-        msg.setMsgType((byte) 4);
-        msg.setPayload(bytes);
-
-        client.sendMessage(msg);
-        } catch (IOException E) {
-            Log.e(TAG, E.getMessage(), E);
-
-        }
+       // try {
+            sendMessage();
+            //
+//          byte[] bytes =  intToByteArray(215);
+//        BTMessage msg = new BTMessage();
+//
+//        msg.setPayload(bytes);
+//
+//        client.sendMessage(msg);
+//        } catch (IOException E) {
+//            Log.e(TAG, E.getMessage(), E);
+//
+//        }
 
 
     }
@@ -390,13 +390,10 @@ public class ControlActivity extends AppCompatActivity implements BTSocketListen
         if (connected) {
             try {
                 BTMessage msg = new BTMessage();
-                msg.setMsgType((byte) 4);
 
                 final EditText input = (EditText) findViewById(R.id.inputMessage);
                 String s = String.valueOf(input.getText());
                 byte[] b = s.getBytes("UTF-8");
-
-
                 msg.setPayload(b);
 
                 client.sendMessage(msg);

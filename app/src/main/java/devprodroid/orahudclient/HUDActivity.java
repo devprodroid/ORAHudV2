@@ -16,6 +16,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
+import java.io.UnsupportedEncodingException;
 import java.util.UUID;
 
 import devprodroid.bluetooth.BTServerService;
@@ -306,13 +307,6 @@ public class HUDActivity extends Activity {
         // stopService(serviceIntent);
     }
 
-    public static int byteArrayToInt(byte[] b)
-    {
-        return   b[3] & 0xFF |
-                (b[2] & 0xFF) << 8 |
-                (b[1] & 0xFF) << 16 |
-                (b[0] & 0xFF) << 24;
-    }
     /**
      * Modify ui according to recieved bluetoth messages
      * @param intent
@@ -322,12 +316,30 @@ public class HUDActivity extends Activity {
         byte[] eventType = intent.getByteArrayExtra("eventType");
         byte[] message = intent.getByteArrayExtra("payload");
 
-        Integer inByte =byteArrayToInt(message);
+        //Integer inByte =byteArrayToInt(message);
 
         final TextView tvText = (TextView) findViewById(R.id.tv2);
 
 
-        tvText.setText(inByte.toString());
+       // tvText.setText(inByte.toString());
+
+
+        String s = null;
+        try {
+            s = new String(message, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        tvText.setText(s);
+
+
+
+
+
+
+
+
+
     }
 
 

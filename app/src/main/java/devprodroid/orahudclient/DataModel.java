@@ -1,11 +1,9 @@
 package devprodroid.orahudclient;
 
-import java.util.Observable;
-
 /**
  * Created by robert on 15.06.15.
  */
-public class DataModel extends Observable {
+public class DataModel  {
 
     boolean attitude =false;
 
@@ -13,13 +11,21 @@ public class DataModel extends Observable {
         this.attitude = attitude;
     }
 
-    public boolean isAttitude() {
-        return attitude;
+
+    /**
+     * Array containing the flightdata
+     * Spec:
+     * [0] pitch
+     * [1] roll
+     * [2] yaw
+     *
+     */
+    private int[] FlightData;
+
+    public DataModel(){
+        FlightData = new int[64];
     }
 
-    public void changeSomething() {
-        // Notify observers of change
-        setChanged();
-        notifyObservers();
-    }
+
+
 }

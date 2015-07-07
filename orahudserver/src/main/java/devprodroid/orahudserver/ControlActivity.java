@@ -311,14 +311,12 @@ public class ControlActivity extends AppCompatActivity implements BTSocketListen
         if (!btSending) {
 
                     btSending=true;
-
-
                     try {
                           if (connected) {
 
-                              byte[] bytes =  intToByteArray(Math.round(roll));
+                              byte[] bytes =  intToByteArray(Math.round(roll/1000));
 
-
+                                //Log.e(TAG, String.valueOf(roll));
 
 
                             BTMessage msg = new BTMessage();

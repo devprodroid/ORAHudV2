@@ -7,19 +7,23 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
-import java.io.UnsupportedEncodingException;
 import java.util.UUID;
 
 import devprodroid.bluetooth.BTServerService;
+import devprodroid.bluetooth.DataModel;
+import devprodroid.orahudclient.glSurface.GLSurf;
 import devprodroid.orahudclient.util.SystemUiHider;
 
 /**
@@ -34,7 +38,7 @@ public class HUDActivity extends Activity {
 
     private static final int REQUEST_ENABLE_BT = 1;
 
-
+    private GLSurfaceView glSurfaceView;
     private ViewFlipper viewFlipper;
     private float lastX;
 
@@ -70,7 +74,7 @@ public class HUDActivity extends Activity {
     /**
      * The Instance of DataModel containing the displayed Data
      */
-    public final DataModel dataModel;
+    public DataModel dataModel;
 
     Intent serviceIntent;
 
@@ -85,6 +89,16 @@ public class HUDActivity extends Activity {
 
         setContentView(R.layout.activity_hud);
         viewFlipper = (ViewFlipper) findViewById(R.id.viewFlipper);
+
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        glSurfaceView = new GLSurf(this,dataModel);
+
+
+        RelativeLayout layout = (RelativeLayout) findViewById(R.id.hud_1);
+
+        RelativeLayout.LayoutParams glParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
+
+        layout.addView(glSurfaceView, glParams);
 
 
         // final View controlsView = findViewById(R.id.btn_bt_connect);
@@ -298,48 +312,47 @@ public class HUDActivity extends Activity {
         super.onResume();
 
         registerReceiver(broadcastReceiver, new IntentFilter(BT_Service.BROADCAST_ACTION));
+        glSurfaceView.onResume();
     }
 
     @Override
     public void onPause() {
         super.onPause();
+        glSurfaceView.onPause();
         unregisterReceiver(broadcastReceiver);
+
         // stopService(serviceIntent);
     }
 
+
     /**
      * Modify ui according to recieved bluetoth messages
-     * @param intent
+     *
+     * @param intent Intent with Payload
      */
     private void updateUI(Intent intent) {
 
-        byte[] eventType = intent.getByteArrayExtra("eventType");
-        byte[] message = intent.getByteArrayExtra("payload");
 
-        //Integer inByte =byteArrayToInt(message);
+        parsePayload(intent);
+
+        // Update UI Elements
 
         final TextView tvText = (TextView) findViewById(R.id.tv2);
+        tvText.setText(dataModel.getRoll().toString());
 
 
-       // tvText.setText(inByte.toString());
+    }
 
+    /**
+     * Read Intent Payload and update DataModel
+     *
+     * @param intent Intent with payload
+     */
+    private void parsePayload(Intent intent) {
 
-        String s = null;
-        try {
-            s = new String(message, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        tvText.setText(s);
-
-
-
-
-
-
-
-
-
+        byte[] message = intent.getByteArrayExtra("payload");
+        dataModel.setFlightData(message);
+        //glSurfaceView.requestRender();
     }
 
 
@@ -374,8 +387,6 @@ public class HUDActivity extends Activity {
 //        mHideHandler.removeCallbacks(mHideRunnable);
 //        mHideHandler.postDelayed(mHideRunnable, delayMillis);
 //    }
-
-
     public void showError(final String msg) {
         runOnUiThread(new Runnable() {
             @Override
@@ -411,11 +422,10 @@ public class HUDActivity extends Activity {
 
         if (mBluetoothAdapter == null) {
             Log.e("BTDeviceDiscover", "No bluetooth adapter detected/available.");
-        return false;
+            return false;
         }
         //Check if bluetooth is enabled.
-        if (!mBluetoothAdapter.isEnabled())
-        {
+        if (!mBluetoothAdapter.isEnabled()) {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
 

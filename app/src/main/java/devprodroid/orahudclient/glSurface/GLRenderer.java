@@ -88,19 +88,13 @@ public class GLRenderer implements GLSurfaceView.Renderer {
         // for the matrix multiplication product to be correct.
         Matrix.multiplyMM(scratch, 0, mMVPMatrix, 0, transMatrix, 0);
 
-
-
-
-
-
-
         // Draw triangle
       //  mTriangle.draw(scratch);
         mAttitude.draw(scratch);
 
 
 
-       // mHorizon.draw(scratch);
+        mHorizon.draw(scratch);
 
     }
 

@@ -23,8 +23,10 @@ public class GLRenderer implements GLSurfaceView.Renderer {
     private final float[] mProjectionMatrix = new float[16];
     private final float[] mViewMatrix = new float[16];
     private final float[] mRotationMatrix = new float[16];
+    private final float[] mTranslationMatrix = new float[16];
 
     private float mAngle;
+    private float mPitch;
     private DataModel mDataModel;
 
     public GLRenderer(Context context, DataModel dataModel) {
@@ -43,8 +45,16 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
     public void onDrawFrame(GL10 unused) {
 
-        mAngle=mDataModel.getRoll().floatValue();
+
         float[] scratch = new float[16];
+        float[] transMatrix = new float[16];
+
+        mAngle=mDataModel.getRoll().floatValue();
+        mPitch =(float)Math.sin(mDataModel.getPitch().doubleValue()* Math.PI / 180.0);
+
+//        Log.d("ora", "Roll: " + mDataModel.getPitch().toString());
+//        Log.d("ora", "Sin(Roll): " + (float) Math.sin(mDataModel.getPitch().doubleValue()));
+
 
         // Draw background color
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
@@ -55,17 +65,42 @@ public class GLRenderer implements GLSurfaceView.Renderer {
         // Calculate the projection and view transformation
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
 
+
         Matrix.setRotateM(mRotationMatrix, 0, mAngle, 0, 0, 1.0f);
+
+
+        //TRANSLATION
+
+
+        Matrix.setIdentityM(transMatrix, 0);
+        Matrix.translateM(transMatrix, 0, 0f, mPitch, 0);
+        Matrix.multiplyMM(transMatrix, 0, mRotationMatrix, 0, transMatrix, 0);
+
+
+
+
+
+
+
 
         // Combine the rotation matrix with the projection and camera view
         // Note that the mMVPMatrix factor *must be first* in order
         // for the matrix multiplication product to be correct.
-        Matrix.multiplyMM(scratch, 0, mMVPMatrix, 0, mRotationMatrix, 0);
+        Matrix.multiplyMM(scratch, 0, mMVPMatrix, 0, transMatrix, 0);
+
+
+
+
+
+
 
         // Draw triangle
       //  mTriangle.draw(scratch);
         mAttitude.draw(scratch);
-        mHorizon.draw(scratch);
+
+
+
+       // mHorizon.draw(scratch);
 
     }
 

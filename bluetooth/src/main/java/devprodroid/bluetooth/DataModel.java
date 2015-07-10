@@ -6,33 +6,43 @@ package devprodroid.bluetooth;
 public class DataModel {
 
 
+    /**
+     * Array containing the flightdata
+     * Spec:
+     * [1] pitch
+     * [2] roll
+     * [3] yaw
+     */
+    private int[] FlightData;
 
 
-    private Integer pitch = 0;
-    private Integer roll = 0;
-    private Integer yaw = 0;
+    //from AttitudeListener
+    private Integer pitch=0;
+    private Integer roll=0;
+    private Integer yaw =0;
 
-    public byte[] getFlightDataByteArray() {
-        return int2byte(FlightData);
+    private Integer pitchCompensation=0;
+    private Integer rollCompensation=0;
+
+    //from AltitudeListener
+    private int altitude =0;
+
+    //from BatteryListener
+    private int batteryLevel=0;
+    private int voltage=0;
+
+
+    public DataModel() {
+        FlightData = new int[64];
+        linkValuesToArrayIndices();
+
     }
 
-
-    public int[] getFlightDataIntArray() {
-        return FlightData;
-    }
-
-
-    public void setFlightData(byte[] input){
-        FlightData=byte2int(input);
-        updateFields();
-
-    }
-
-    public static int[] byte2int(byte[]src) {
+    public static int[] byte2int(byte[] src) {
         int dstLength = src.length >>> 2;
-        int[]dst = new int[dstLength];
+        int[] dst = new int[dstLength];
 
-        for (int i=0; i<dstLength; i++) {
+        for (int i = 0; i < dstLength; i++) {
             int j = i << 2;
             int x = 0;
             x += (src[j++] & 0xff) << 0;
@@ -44,11 +54,11 @@ public class DataModel {
         return dst;
     }
 
-    private static byte[] int2byte(int[]src) {
+    private static byte[] int2byte(int[] src) {
         int srcLength = src.length;
-        byte[]dst = new byte[srcLength << 2];
+        byte[] dst = new byte[srcLength << 2];
 
-        for (int i=0; i<srcLength; i++) {
+        for (int i = 0; i < srcLength; i++) {
             int x = src[i];
             int j = i << 2;
             dst[j++] = (byte) ((x >>> 0) & 0xff);
@@ -59,32 +69,50 @@ public class DataModel {
         return dst;
     }
 
-    /**
-     * Array containing the flightdata
-     * Spec:
-     * [0] pitch
-     * [1] roll
-     * [2] yaw
-     */
-    private int[] FlightData;
-
-    public DataModel() {
-        FlightData = new int[64];
-        linkValuesToArrayIndices();
+    public byte[] getFlightDataByteArray() {
+        return int2byte(FlightData);
     }
 
+    public int[] getFlightDataIntArray() {
+        return FlightData;
+    }
+
+    public void setFlightData(byte[] input) {
+        FlightData = byte2int(input);
+        updateFields();
+
+    }
 
     private void linkValuesToArrayIndices() {
+
         FlightData[0] = pitch;
         FlightData[1] = roll;
         FlightData[2] = yaw;
 
+        FlightData[3] = pitchCompensation;
+        FlightData[4] = rollCompensation;
+
+        FlightData[5] = altitude;
+
+        FlightData[6] = batteryLevel;
+
     }
 
     public void updateFields() {
-        pitch = FlightData[0]  ;
-        roll = FlightData[1] ;
-        yaw =  FlightData[2] ;
+
+        pitch = FlightData[0];
+        roll = FlightData[1];
+        yaw = FlightData[2];
+
+        pitchCompensation = FlightData[3];
+        rollCompensation = FlightData[4];
+
+        altitude = FlightData[5];
+
+        batteryLevel = FlightData[6];
+
+
+
 
     }
 
@@ -117,5 +145,51 @@ public class DataModel {
     public void setYaw(int yaw) {
         this.yaw = yaw;
         linkValuesToArrayIndices();
+    }
+
+    public Integer getPitchCompensation() {
+        return pitchCompensation;
+    }
+
+    public void setPitchCompensation(int pitchCompensation) {
+        this.pitchCompensation = pitchCompensation;
+        linkValuesToArrayIndices();
+    }
+
+    public Integer getRollCompensation() {
+        return rollCompensation;
+    }
+
+    public void setRollCompensation(int rollCompensation) {
+        this.rollCompensation = rollCompensation;
+        linkValuesToArrayIndices();
+    }
+
+    public void setAltitude(int altitude) {
+        this.altitude = altitude;
+        linkValuesToArrayIndices();
+    }
+
+    public Integer getAltitude() {
+        return altitude;
+    }
+
+
+    public void setBatteryLevel(int batteryLevel) {
+        this.batteryLevel = batteryLevel;
+        linkValuesToArrayIndices();
+    }
+
+    public Integer getBatteryLevel() {
+        return batteryLevel;
+    }
+
+    public void setVoltage(int voltage) {
+        this.voltage = voltage;
+        linkValuesToArrayIndices();
+    }
+
+    public int getVoltage() {
+        return voltage;
     }
 }

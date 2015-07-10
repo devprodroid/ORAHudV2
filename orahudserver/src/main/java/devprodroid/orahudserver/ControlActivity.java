@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -24,7 +25,10 @@ import java.nio.ByteBuffer;
 import java.util.UUID;
 
 import de.yadrone.base.IARDrone;
+import de.yadrone.base.navdata.Altitude;
+import de.yadrone.base.navdata.AltitudeListener;
 import de.yadrone.base.navdata.AttitudeListener;
+import de.yadrone.base.navdata.BatteryListener;
 import devprodroid.bluetooth.BTClient;
 import devprodroid.bluetooth.BTMessage;
 import devprodroid.bluetooth.BTSocketListener;
@@ -34,30 +38,34 @@ import devprodroid.bluetooth.DataModel;
 /**
  * This Activity displays Control interface and informations for the droneii
  */
-public class ControlActivity extends AppCompatActivity implements BTSocketListener.Callback, AttitudeListener {
+public class ControlActivity extends AppCompatActivity implements BTSocketListener.Callback, AttitudeListener,AltitudeListener, BatteryListener {
 
 
-    private final String TAG = getClass().getPackage().getName();
     public final static String MSG_BT_UUID = "MSG_BT_UUID";
     public final static String MSG_MAC_BT_DEVICE_ADDRESS = "MSG_MAC_BT_DEVICE_ADDRESS";
-
+    private final String TAG = getClass().getPackage().getName();
     private boolean connected = false;
 
     private BluetoothDevice device;
 
     private BTClient client;
-    private boolean btSending = false;
+    private Boolean btSending = false;
     private ProgressDialog mProgressDialog;
 
     private TextView tvText;
 
     private DataModel dataModel;
+    private final static int INTERVAL = 500;
+    Handler mHandler;
+    public static byte[] float2ByteArray(float value) {
+        return ByteBuffer.allocate(4).putFloat(value).array();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_control);
-
+        Handler handler = new Handler();
 
         BluetoothAdapter ba = BluetoothAdapter.getDefaultAdapter();
 
@@ -241,7 +249,6 @@ public class ControlActivity extends AppCompatActivity implements BTSocketListen
         });
     }
 
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -264,13 +271,13 @@ public class ControlActivity extends AppCompatActivity implements BTSocketListen
         return super.onOptionsItemSelected(item);
     }
 
-
     public void onResume() {
         super.onResume();
 
         YADroneApplication app = (YADroneApplication) getApplication();
         IARDrone drone = app.getARDrone();
         drone.getNavDataManager().addAttitudeListener(this);
+
 
 
     }
@@ -282,61 +289,27 @@ public class ControlActivity extends AppCompatActivity implements BTSocketListen
         IARDrone drone = app.getARDrone();
         drone.getNavDataManager().removeAttitudeListener(this);
 
+
     }
-
-
-    public static byte[] float2ByteArray(float value) {
-        return ByteBuffer.allocate(4).putFloat(value).array();
-    }
-
-
-
-
 
     public void attitudeUpdated(final float pitch, final float roll, final float yaw) {
         final TextView text = (TextView)findViewById(R.id.text_navdata);
 
-
-
-        new SendtoBT().execute(pitch,roll,yaw);
-//        if (!btSending) {
-//
-//            btSending = true;
-//            try {
-//                if (connected) {
-////                              byte[] bytes =  intToByteArray(Math.round(roll/1000));
-//                    dataModel.setPitch(Math.round(pitch/1000 ));
-//                    dataModel.setRoll(Math.round(roll /1000));
-//                    dataModel.setYaw(Math.round(yaw /1000));
-//
-//
-//
-//
-//
-//
-//                    BTMessage msg = new BTMessage();
-//
-//                    msg.setPayload(dataModel.getFlightDataByteArray());
-//                   // text.setText("Pitch: " + dataModel.getPitch() + " Roll: " + dataModel.getRoll() + " Yaw: " + dataModel.getYaw());
-//
-//                    client.sendMessage(msg);
-//                }
-//            } catch (IOException E) {
-//                Log.e(TAG, E.getMessage(), E);
-//
-//            } finally {
-//                btSending = false;
-//            }
-//
-//
-//        }
+        dataModel.setPitch(Math.round(pitch / 1000));
+        dataModel.setRoll(Math.round(roll / 1000));
+        dataModel.setYaw(Math.round(yaw / 1000));
+        new SendtoBT().execute( );
     }
 
     public void attitudeUpdated(float arg0, float arg1) {
     }
 
-    public void windCompensation(float arg0, float arg1) {
+    public void windCompensation(float pitch, float roll) {
+        dataModel.setPitchCompensation(Math.round(pitch / 1000));
+        dataModel.setRollCompensation(Math.round(roll / 1000));
     }
+
+
 
 
     /**
@@ -345,63 +318,10 @@ public class ControlActivity extends AppCompatActivity implements BTSocketListen
      * @param v
      */
     public void onBtnClicked(View v) {
-        //  YADroneApplication app = (YADroneApplication) getApplication();
-        // final IARDrone drone = app.getARDrone();
-        //  drone.getCommandManager().setLedsAnimation(LEDAnimation.BLINK_ORANGE, 3, 10);
-        // try {
-        //sendMessage();
-//
-//        dataModel.setPitch(350);
-//        dataModel.setRoll(Math.round(350));
-//        dataModel.setYaw(Math.round(350 ));
-//
-//
-//        BTMessage msg = new BTMessage();
-//
-//        msg.setPayload(dataModel.getFlightDataByteArray());
-//
-//        try {
-//            client.sendMessage(msg);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-        //
+
         new SendtoBT().execute(3500000f,3500000f,-53500f);
 
     }
-
-    private class SendtoBT extends AsyncTask<Float, Void ,Boolean> {
-
-        @Override
-        protected Boolean doInBackground(Float... params) {
-            try {
-                if (!btSending) {
-
-                    btSending = true;
-                    if (connected) {
-
-                        dataModel.setPitch(Math.round(params[0] / 1000));
-                        dataModel.setRoll(Math.round(params[1] / 1000));
-                        dataModel.setYaw(Math.round(params[2] / 1000));
-
-                        BTMessage msg = new BTMessage();
-
-                        msg.setPayload(dataModel.getFlightDataByteArray());
-
-                        client.sendMessage(msg);
-                    }
-                }
-            } catch (IOException E) {
-                Log.e(TAG, E.getMessage(), E);
-
-            } finally {
-                btSending = false;
-                return true;
-            }
-
-        }
-    }
-
 
     private void sendMessage() {
         if (connected) {
@@ -420,7 +340,6 @@ public class ControlActivity extends AppCompatActivity implements BTSocketListen
             }
         }
     }
-
 
     @Override
     public BTMessage onMsgReceived(BluetoothDevice bluetoothDevice, BTMessage btMessage) {
@@ -459,6 +378,65 @@ public class ControlActivity extends AppCompatActivity implements BTSocketListen
 
         super.onDestroy();
     }
+
+    @Override
+    public void receivedAltitude(int altitude) {
+        dataModel.setAltitude(Math.round(altitude));
+    }
+
+    @Override
+    public void receivedExtendedAltitude(Altitude altitude) {
+
+    }
+
+    @Override
+    public void batteryLevelChanged(int batteryLevel) {
+        dataModel.setBatteryLevel(batteryLevel);
+    }
+
+    @Override
+    public void voltageChanged(int voltage) {
+        dataModel.setVoltage(voltage);
+    }
+
+
+
+
+
+
+
+
+
+    private class SendtoBT extends AsyncTask<Float, Void ,Boolean> {
+
+        @Override
+        protected Boolean doInBackground(Float... params) {
+
+            if (!btSending) {
+                try {
+                    btSending = true;
+                    if (connected) {
+                        BTMessage msg = new BTMessage();
+
+                        msg.setPayload(dataModel.getFlightDataByteArray());
+
+                        client.sendMessage(msg);
+
+                    }
+
+
+                } catch (IOException E) {
+                    Log.e(TAG, E.getMessage(), E);
+
+                } finally {
+                    btSending = false;
+
+                }
+            }
+            return true;
+        }
+    }
+
 
 
 }

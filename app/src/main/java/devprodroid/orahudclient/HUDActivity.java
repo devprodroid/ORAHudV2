@@ -338,7 +338,8 @@ public class HUDActivity extends Activity {
         // Update UI Elements
 
         final TextView tvText = (TextView) findViewById(R.id.tv2);
-        tvText.setText(dataModel.getRoll().toString());
+        tvText.setText("Roll: " + dataModel.getRoll().toString());
+
 
 
     }

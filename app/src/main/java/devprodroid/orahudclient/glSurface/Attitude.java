@@ -11,18 +11,6 @@ public class Attitude {
 
     private FloatBuffer vertexBuffer;
     private ShortBuffer drawListBuffer;
-//    private final String vertexShaderCode =
-//            "attribute vec4 vPosition;" +
-//                    "void main() {" +
-//                    "  gl_Position = vPosition;" +
-//                    "}";
-//
-//    private final String fragmentShaderCode =
-//            "precision mediump float;" +
-//                    "uniform vec4 vColor;" +
-//                    "void main() {" +
-//                    "  gl_FragColor = vColor;" +
-//                    "}";
 
 
     private final String vertexShaderCode =
@@ -137,6 +125,19 @@ public class Attitude {
         // get handle to shape's transformation matrix
         mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
         GLRenderer.checkGlError("glGetUniformLocation");
+
+//
+//        //TRANSLATION
+//        float[] transMatrix = new float[16];
+//
+//        Matrix.setIdentityM(transMatrix, 0);
+//        Matrix.translateM(transMatrix,0,0f,0.5f,0);
+//        Matrix.multiplyMM(transMatrix, 0, mvpMatrix, 0, transMatrix, 0);
+//
+//
+
+
+
 
         // Apply the projection and view transformation
         GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);

@@ -12,6 +12,7 @@
     <RelativeLayout
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
+        android:keepScreenOn="true"
         android:layout_weight="0.49">
 
         <TextView

@@ -312,6 +312,7 @@ public class HUDActivity extends Activity {
         super.onResume();
 
         registerReceiver(broadcastReceiver, new IntentFilter(BT_Service.BROADCAST_ACTION));
+        startBTService();
         glSurfaceView.onResume();
     }
 

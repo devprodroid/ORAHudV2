@@ -72,6 +72,7 @@ public class ConnectionActivity extends AppCompatActivity {
             drone.start();
 
 
+
         } catch (Exception exc) {
 
             if (drone != null)

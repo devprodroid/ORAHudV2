@@ -67,6 +67,8 @@ public class ControlActivity extends AppCompatActivity implements BTSocketListen
         setContentView(R.layout.activity_control);
         Handler handler = new Handler();
 
+        //TODO: Runtime configuration changes have to be acknowledged
+       //TODO: Implement reconnection mechanism
         BluetoothAdapter ba = BluetoothAdapter.getDefaultAdapter();
 
         //Param reading
@@ -354,7 +356,9 @@ public class ControlActivity extends AppCompatActivity implements BTSocketListen
     @Override
     public void onDisconnected(BluetoothDevice bluetoothDevice) {
         showMsg("Disconnected from server.");
-        finish();
+
+        //TODO: Ask User to try to restore connection
+        //finish();
     }
 
     private void showMsg(final String msg) {

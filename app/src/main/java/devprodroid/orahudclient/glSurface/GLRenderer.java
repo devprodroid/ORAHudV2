@@ -91,9 +91,6 @@ public class GLRenderer implements GLSurfaceView.Renderer {
         // Draw triangle
       //  mTriangle.draw(scratch);
         mAttitude.draw(scratch);
-
-
-
         mHorizon.draw(scratch);
 
     }

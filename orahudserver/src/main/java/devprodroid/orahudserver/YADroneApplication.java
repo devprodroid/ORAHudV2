@@ -14,6 +14,7 @@ public class YADroneApplication extends Application
 
     public void onCreate()
     {
+        super.onCreate();
         drone = new ARDrone("192.168.1.1", null); // null because of missing video support on Android
     }
 

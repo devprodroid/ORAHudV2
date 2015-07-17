@@ -4,6 +4,10 @@ import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -16,7 +20,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,6 +28,9 @@ import java.nio.ByteBuffer;
 import java.util.UUID;
 
 import de.yadrone.base.IARDrone;
+import de.yadrone.base.navdata.AcceleroListener;
+import de.yadrone.base.navdata.AcceleroPhysData;
+import de.yadrone.base.navdata.AcceleroRawData;
 import de.yadrone.base.navdata.Altitude;
 import de.yadrone.base.navdata.AltitudeListener;
 import de.yadrone.base.navdata.AttitudeListener;
@@ -38,7 +44,7 @@ import devprodroid.bluetooth.DataModel;
 /**
  * This Activity displays Control interface and informations for the droneii
  */
-public class ControlActivity extends AppCompatActivity implements BTSocketListener.Callback, AttitudeListener,AltitudeListener, BatteryListener {
+public class ControlActivity extends AppCompatActivity implements SensorEventListener, BTSocketListener.Callback, AttitudeListener,AltitudeListener, BatteryListener, AcceleroListener {
 
 
     public final static String MSG_BT_UUID = "MSG_BT_UUID";
@@ -48,15 +54,31 @@ public class ControlActivity extends AppCompatActivity implements BTSocketListen
 
     private BluetoothDevice device;
 
-    private BTClient client;
+    private BTClient mBTClient;
     private Boolean btSending = false;
     private ProgressDialog mProgressDialog;
 
     private TextView tvText;
 
-    private DataModel dataModel;
+    private DataModel mdataModel;
+
+    private DroneControl mDroneControl;
+
+    private YADroneApplication mApp;
+    private IARDrone mDrone;
+
     private final static int INTERVAL = 500;
     Handler mHandler;
+
+
+
+
+    private SensorManager mSensorManager;
+    private Sensor mSensor;
+
+
+
+
     public static byte[] float2ByteArray(float value) {
         return ByteBuffer.allocate(4).putFloat(value).array();
     }
@@ -65,7 +87,25 @@ public class ControlActivity extends AppCompatActivity implements BTSocketListen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_control);
-        Handler handler = new Handler();
+
+        //register Orientation sensor
+        mSensorManager = (SensorManager) getSystemService(this.getBaseContext().SENSOR_SERVICE);
+        mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+
+        mApp = (YADroneApplication) getApplication();
+        mDrone = mApp.getARDrone();
+        mDroneControl = new DroneControl(mDrone);
+
+        if (mSensor != null) {
+            // Success! There's an accelerometer
+            mSensorManager.registerListener(this, mSensor,
+                    SensorManager.SENSOR_DELAY_FASTEST);
+        } else {
+            Toast.makeText(this, "This device doesnt support STRING_TYPE_ACCELEROMETER",
+                    Toast.LENGTH_SHORT).show();
+            //stopSelf();
+        }
+
 
         //TODO: Runtime configuration changes have to be acknowledged
        //TODO: Implement reconnection mechanism
@@ -77,10 +117,11 @@ public class ControlActivity extends AppCompatActivity implements BTSocketListen
         final UUID serv_UUID = UUID.fromString(act_param.getStringExtra(MSG_BT_UUID));
 
 
-        tvText = (TextView) findViewById(R.id.text_navdata);
+        
+        //tvText = (TextView) findViewById(R.id.text_navdata);
 
         initButtons();
-        dataModel = new DataModel();
+        mdataModel = new DataModel();
 
 
         if (true) {
@@ -103,17 +144,22 @@ public class ControlActivity extends AppCompatActivity implements BTSocketListen
             new Thread("Client creation") {
                 public void run() {
                     try {
-                        client = new BTClient(ControlActivity.this, ControlActivity.this, device, serv_UUID);
+                        mProgressDialog.show();
+                        mBTClient = new BTClient(ControlActivity.this, ControlActivity.this, device, serv_UUID);
 
                         //connection successful
                         connected = true;
-                        mProgressDialog.dismiss();
+
                         showMsg("Connection successful!");
 
                     } catch (IOException e) {
                         showMsg(e.getMessage());
                         Log.e(TAG, e.getMessage(), e);
+
                         finish();
+                    }
+                    finally {
+                        mProgressDialog.dismiss();
                     }
                 }
 
@@ -121,69 +167,74 @@ public class ControlActivity extends AppCompatActivity implements BTSocketListen
             }.start();
         }
 
+
+       //// WindowManager mWindowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
+       // Display mDisplay = mWindowManager.getDefaultDisplay();
+
+       // Log.d("ORIENTATION_TEST", "getOrientation(): " + mDisplay.getRotation());
+
     }
 
     private void initButtons() {
-        YADroneApplication app = (YADroneApplication) getApplication();
-        final IARDrone drone = app.getARDrone();
-
-        Button forward = (Button) findViewById(R.id.cmd_forward);
-        forward.setOnTouchListener(new OnTouchListener() {
-            public boolean onTouch(View v, MotionEvent event) {
-                if (event.getAction() == MotionEvent.ACTION_DOWN)
-                    drone.getCommandManager().forward(20);
-                else if (event.getAction() == MotionEvent.ACTION_UP)
-                    drone.hover();
-
-                return true;
-            }
-        });
-
-        Button backward = (Button) findViewById(R.id.cmd_backward);
-        backward.setOnTouchListener(new OnTouchListener() {
-            public boolean onTouch(View v, MotionEvent event) {
-                if (event.getAction() == MotionEvent.ACTION_DOWN)
-                    drone.getCommandManager().backward(20);
-                else if (event.getAction() == MotionEvent.ACTION_UP)
-                    drone.hover();
-
-                return true;
-            }
-        });
 
 
-        Button left = (Button) findViewById(R.id.cmd_left);
-        left.setOnTouchListener(new OnTouchListener() {
-            public boolean onTouch(View v, MotionEvent event) {
-                if (event.getAction() == MotionEvent.ACTION_DOWN)
-                    drone.getCommandManager().goLeft(20);
-                else if (event.getAction() == MotionEvent.ACTION_UP)
-                    drone.hover();
-
-                return true;
-            }
-        });
-
-
-        Button right = (Button) findViewById(R.id.cmd_right);
-        right.setOnTouchListener(new OnTouchListener() {
-            public boolean onTouch(View v, MotionEvent event) {
-                if (event.getAction() == MotionEvent.ACTION_DOWN)
-                    drone.getCommandManager().goRight(20);
-                else if (event.getAction() == MotionEvent.ACTION_UP)
-                    drone.hover();
-
-                return true;
-            }
-        });
+//        Button forward = (Button) findViewById(R.id.cmd_forward);
+//        forward.setOnTouchListener(new OnTouchListener() {
+//            public boolean onTouch(View v, MotionEvent event) {
+//                if (event.getAction() == MotionEvent.ACTION_DOWN)
+//                    mDrone.getCommandManager().forward(20);
+//                else if (event.getAction() == MotionEvent.ACTION_UP)
+//                    mDroneControl.hover();
+//
+//                return true;
+//            }
+//        });
+//
+//        Button backward = (Button) findViewById(R.id.cmd_backward);
+//        backward.setOnTouchListener(new OnTouchListener() {
+//            public boolean onTouch(View v, MotionEvent event) {
+//                if (event.getAction() == MotionEvent.ACTION_DOWN)
+//                    mDrone.getCommandManager().backward(20);
+//                else if (event.getAction() == MotionEvent.ACTION_UP)
+//                    mDroneControl.hover();
+//
+//                return true;
+//            }
+//        });
+//
+//
+//        Button left = (Button) findViewById(R.id.cmd_left);
+//        left.setOnTouchListener(new OnTouchListener() {
+//            public boolean onTouch(View v, MotionEvent event) {
+//                if (event.getAction() == MotionEvent.ACTION_DOWN)
+//                    mDrone.getCommandManager().goLeft(20);
+//                else if (event.getAction() == MotionEvent.ACTION_UP)
+//                    mDroneControl.hover();
+//
+//                return true;
+//            }
+//        });
+//
+//
+//        Button right = (Button) findViewById(R.id.cmd_right);
+//        right.setOnTouchListener(new OnTouchListener() {
+//            public boolean onTouch(View v, MotionEvent event) {
+//                if (event.getAction() == MotionEvent.ACTION_DOWN)
+//                    mDrone.getCommandManager().goRight(20);
+//                else if (event.getAction() == MotionEvent.ACTION_UP)
+//                    mDroneControl.hover();
+//
+//                return true;
+//            }
+//        });
 
         Button up = (Button) findViewById(R.id.cmd_up);
         up.setOnTouchListener(new OnTouchListener() {
             public boolean onTouch(View v, MotionEvent event) {
                 if (event.getAction() == MotionEvent.ACTION_DOWN)
-                    drone.getCommandManager().up(40);
+                    mDrone.getCommandManager().up(40);
                 else if (event.getAction() == MotionEvent.ACTION_UP)
-                    drone.hover();
+                    mDroneControl.hover();
 
                 return true;
             }
@@ -193,9 +244,9 @@ public class ControlActivity extends AppCompatActivity implements BTSocketListen
         down.setOnTouchListener(new OnTouchListener() {
             public boolean onTouch(View v, MotionEvent event) {
                 if (event.getAction() == MotionEvent.ACTION_DOWN)
-                    drone.getCommandManager().down(40);
+                    mDrone.getCommandManager().down(40);
                 else if (event.getAction() == MotionEvent.ACTION_UP)
-                    drone.hover();
+                    mDroneControl.hover();
 
                 return true;
             }
@@ -206,9 +257,10 @@ public class ControlActivity extends AppCompatActivity implements BTSocketListen
         spinLeft.setOnTouchListener(new OnTouchListener() {
             public boolean onTouch(View v, MotionEvent event) {
                 if (event.getAction() == MotionEvent.ACTION_DOWN)
-                    drone.getCommandManager().spinLeft(20);
+                    mDrone.getCommandManager().spinLeft(20);
+
                 else if (event.getAction() == MotionEvent.ACTION_UP)
-                    drone.hover();
+                    mDroneControl.hover();
 
                 return true;
             }
@@ -219,9 +271,9 @@ public class ControlActivity extends AppCompatActivity implements BTSocketListen
         spinRight.setOnTouchListener(new OnTouchListener() {
             public boolean onTouch(View v, MotionEvent event) {
                 if (event.getAction() == MotionEvent.ACTION_DOWN)
-                    drone.getCommandManager().spinRight(20);
+                    mDrone.getCommandManager().spinRight(20);
                 else if (event.getAction() == MotionEvent.ACTION_UP)
-                    drone.hover();
+                    mDroneControl.hover();
 
                 return true;
             }
@@ -229,27 +281,29 @@ public class ControlActivity extends AppCompatActivity implements BTSocketListen
 
         final Button landing = (Button) findViewById(R.id.cmd_landing);
         landing.setOnClickListener(new OnClickListener() {
-            boolean isFlying = false;
+
 
             public void onClick(View v) {
-                if (!isFlying) {
-                    drone.takeOff();
+                if (!mDroneControl.isFlying()) {
+                    mDroneControl.takeoff();
                     landing.setText("Landing");
                 } else {
-                    drone.landing();
+                    mDroneControl.land();
                     landing.setText("Take Off");
                 }
-                isFlying = !isFlying;
+
             }
         });
 
         Button emergency = (Button) findViewById(R.id.cmd_emergency);
         emergency.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                drone.reset();
+                mDrone.reset();
             }
         });
     }
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -276,30 +330,47 @@ public class ControlActivity extends AppCompatActivity implements BTSocketListen
     public void onResume() {
         super.onResume();
 
+        addDroneListeners();
+        mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_FASTEST);
+
+        mDroneControl.startThread();
+
+    }
+
+    private void addDroneListeners() {
         YADroneApplication app = (YADroneApplication) getApplication();
         IARDrone drone = app.getARDrone();
+
         drone.getNavDataManager().addAttitudeListener(this);
-
-
-
+        drone.getNavDataManager().addBatteryListener(this);
+        drone.getNavDataManager().addAltitudeListener(this);
+        drone.getNavDataManager().addAcceleroListener(this);
     }
 
     public void onPause() {
         super.onPause();
+        mDroneControl.stopThread();
 
-        YADroneApplication app = (YADroneApplication) getApplication();
-        IARDrone drone = app.getARDrone();
-        drone.getNavDataManager().removeAttitudeListener(this);
+        removeDroneListeners();
+        mSensorManager.unregisterListener(this);
 
 
     }
 
-    public void attitudeUpdated(final float pitch, final float roll, final float yaw) {
-        final TextView text = (TextView)findViewById(R.id.text_navdata);
+    private void removeDroneListeners() {
+        YADroneApplication app = (YADroneApplication) getApplication();
+        IARDrone drone = app.getARDrone();
+        drone.getNavDataManager().removeAttitudeListener(this);
+        drone.getNavDataManager().removeBatteryListener(this);
+        drone.getNavDataManager().removeAltitudeListener(this);
+        drone.getNavDataManager().removeAcceleroListener(this);
+    }
 
-        dataModel.setPitch(Math.round(pitch / 1000));
-        dataModel.setRoll(Math.round(roll / 1000));
-        dataModel.setYaw(Math.round(yaw / 1000));
+    public void attitudeUpdated(final float pitch, final float roll, final float yaw) {
+
+        mdataModel.setPitch(Math.round(pitch / 1000));
+        mdataModel.setRoll(Math.round(roll / 1000));
+        mdataModel.setYaw(Math.round(yaw / 1000));
         new SendtoBT().execute( );
     }
 
@@ -307,41 +378,10 @@ public class ControlActivity extends AppCompatActivity implements BTSocketListen
     }
 
     public void windCompensation(float pitch, float roll) {
-        dataModel.setPitchCompensation(Math.round(pitch / 1000));
-        dataModel.setRollCompensation(Math.round(roll / 1000));
+        mdataModel.setPitchCompensation(Math.round(pitch / 1000));
+        mdataModel.setRollCompensation(Math.round(roll / 1000));
     }
 
-
-
-
-    /**
-     * Callback for the refresh button.
-     *
-     * @param v
-     */
-    public void onBtnClicked(View v) {
-
-        new SendtoBT().execute(3500000f,3500000f,-53500f);
-
-    }
-
-    private void sendMessage() {
-        if (connected) {
-            try {
-                BTMessage msg = new BTMessage();
-
-                final EditText input = (EditText) findViewById(R.id.inputMessage);
-                String s = String.valueOf(input.getText());
-                byte[] b = s.getBytes("UTF-8");
-                msg.setPayload(b);
-
-                client.sendMessage(msg);
-            } catch (IOException E) {
-                E.printStackTrace();
-
-            }
-        }
-    }
 
     @Override
     public BTMessage onMsgReceived(BluetoothDevice bluetoothDevice, BTMessage btMessage) {
@@ -372,8 +412,8 @@ public class ControlActivity extends AppCompatActivity implements BTSocketListen
 
     @Override
     public void onDestroy() {
-        if (client != null) {
-            client.close();
+        if (mBTClient != null) {
+            mBTClient.close();
         }
 
         if (mProgressDialog != null) {
@@ -385,7 +425,7 @@ public class ControlActivity extends AppCompatActivity implements BTSocketListen
 
     @Override
     public void receivedAltitude(int altitude) {
-        dataModel.setAltitude(Math.round(altitude));
+       mdataModel.setAltitude(0);
     }
 
     @Override
@@ -395,20 +435,53 @@ public class ControlActivity extends AppCompatActivity implements BTSocketListen
 
     @Override
     public void batteryLevelChanged(int batteryLevel) {
-        dataModel.setBatteryLevel(batteryLevel);
+        mdataModel.setBatteryLevel(batteryLevel);
+       // Log.e(TAG, "Batterylevel: " +( (Integer) batteryLevel).toString());
     }
 
     @Override
     public void voltageChanged(int voltage) {
-        dataModel.setVoltage(voltage);
+        //mdataModel.setVoltage(voltage);
     }
 
+    @Override
+    public void receivedRawData(AcceleroRawData acceleroRawData) {
+
+    }
+
+    @Override
+    public void receivedPhysData(AcceleroPhysData acceleroPhysData) {
+        float tmp=acceleroPhysData.getPhysAccs()[2];
+        mdataModel.setAccZ(Math.round(tmp));
+
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+
+     //   float azimuth_angle = event.values[0];
+       // float pitch_angle = event.values[1];-3 +3
+      //  float roll_angle = event.values[2];
+
+
+        TextView tv = (TextView) findViewById(R.id.tv);
+        tv.setText("Orientation X (Roll) :" + Float.toString(event.values[2]) + "\n" +
+                "Orientation Y (Pitch) :" + Float.toString(event.values[1]) + "\n" +
+                "Orientation Z (Yaw) :" + Float.toString(event.values[0]));
 
 
 
+    //landscape config
 
+        mDroneControl.setPitch_angle(event.values[0]);
+        mDroneControl.setRoll_angle(event.values[1]);
 
+    }
 
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+    }
 
 
     private class SendtoBT extends AsyncTask<Float, Void ,Boolean> {
@@ -422,9 +495,9 @@ public class ControlActivity extends AppCompatActivity implements BTSocketListen
                     if (connected) {
                         BTMessage msg = new BTMessage();
 
-                        msg.setPayload(dataModel.getFlightDataByteArray());
+                        msg.setPayload(mdataModel.getFlightDataByteArray());
 
-                        client.sendMessage(msg);
+                        mBTClient.sendMessage(msg);
 
                     }
 

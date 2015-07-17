@@ -34,7 +34,7 @@ public class Horizon {
     private short drawOrder[] = {0, 1, 2, 0, 2, 3}; // order to draw vertices
     private int mPositionHandle;
     private int mColorHandle;
-    private int mMVPMatrixHandle;
+
 
     private final int mProgram;
     // Set color with red, green, blue and alpha (opacity) values
@@ -42,7 +42,7 @@ public class Horizon {
     private final int vertexCount = squareCoords.length / COORDS_PER_VERTEX;
     private final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
 
-    public void draw(float[] mvpMatrix) {
+    public void draw() {
         // Add program to OpenGL environment
         GLES20.glUseProgram(mProgram);
 
@@ -64,13 +64,6 @@ public class Horizon {
         // Set color for drawing the triangle
         GLES20.glUniform4fv(mColorHandle, 1, color, 0);
 
-        // get handle to shape's transformation matrix
-        mMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
-        GLRenderer.checkGlError("glGetUniformLocation");
-
-        // Apply the projection and view transformation
-        GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0);
-        GLRenderer.checkGlError("glUniformMatrix4fv");
 
         // Draw the triangle
         GLES20.glDrawArrays(GLES20.GL_TRIANGLE_FAN, 0, vertexCount);

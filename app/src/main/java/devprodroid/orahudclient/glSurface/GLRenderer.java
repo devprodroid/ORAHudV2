@@ -13,9 +13,10 @@ import devprodroid.bluetooth.DataModel;
 
 public class GLRenderer implements GLSurfaceView.Renderer {
     private Horizon   mHorizon;
-    private Triangle mTriangle;
+
     private Attitude mAttitude;
 
+    private Battery mBattery;
     private static final String TAG = "MyGLRenderer";
 
     // mMVPMatrix is an abbreviation for "Model View Projection Matrix"
@@ -24,9 +25,12 @@ public class GLRenderer implements GLSurfaceView.Renderer {
     private final float[] mViewMatrix = new float[16];
     private final float[] mRotationMatrix = new float[16];
     private final float[] mTranslationMatrix = new float[16];
+    private final float[] mBatteryScaleMatrix = new float[16];
+
 
     private float mAngle;
     private float mPitch;
+    private Integer mBatteryLevel;
     private DataModel mDataModel;
 
     public GLRenderer(Context context, DataModel dataModel) {
@@ -38,22 +42,28 @@ public class GLRenderer implements GLSurfaceView.Renderer {
         // Set the background frame color
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-        mTriangle = new Triangle();
-        mAttitude   = new Attitude();
-         mHorizon = new Horizon();
+
+
+
+        mAttitude   = new Attitude(); //attitude
+
+        mHorizon = new Horizon(); //Atificial horizon
+        mBattery = new Battery(); //batterystatus
     }
 
     public void onDrawFrame(GL10 unused) {
 
-
+        // drawHorizonFrame();
         float[] scratch = new float[16];
         float[] transMatrix = new float[16];
+        float[] batteryScaleMatrix = new float[16];
 
-        mAngle=mDataModel.getRoll().floatValue();
+        //Get Values from DataModel
+
+       // getModelValues();
+        mAngle= mDataModel.getRoll().floatValue();
         mPitch =(float)Math.sin(mDataModel.getPitch().doubleValue()* Math.PI / 180.0);
-
-//        Log.d("ora", "Roll: " + mDataModel.getPitch().toString());
-//        Log.d("ora", "Sin(Roll): " + (float) Math.sin(mDataModel.getPitch().doubleValue()));
+        mBatteryLevel =mDataModel.getBatteryLevel();
 
 
         // Draw background color
@@ -65,35 +75,39 @@ public class GLRenderer implements GLSurfaceView.Renderer {
         // Calculate the projection and view transformation
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
 
-
+        //Set Rotation for attitude Marker
         Matrix.setRotateM(mRotationMatrix, 0, mAngle, 0, 0, 1.0f);
 
-
-        //TRANSLATION
-
-
+        //Set Translation for attidude Marker
         Matrix.setIdentityM(transMatrix, 0);
         Matrix.translateM(transMatrix, 0, 0f, mPitch, 0);
         Matrix.multiplyMM(transMatrix, 0, mRotationMatrix, 0, transMatrix, 0);
-
-
-
-
-
-
-
-
-        // Combine the rotation matrix with the projection and camera view
-        // Note that the mMVPMatrix factor *must be first* in order
-        // for the matrix multiplication product to be correct.
+//
+//
+//        // Combine the rotation matrix with the projection and camera view
         Matrix.multiplyMM(scratch, 0, mMVPMatrix, 0, transMatrix, 0);
-
-        // Draw triangle
-      //  mTriangle.draw(scratch);
+////
         mAttitude.draw(scratch);
-        mHorizon.draw(scratch);
+//
+          mHorizon.draw();
+//
+//
+//
+        Matrix.scaleM(mBatteryScaleMatrix, 0, 0f, 0f, 0f);
+        Matrix.multiplyMM(scratch, 0, mMVPMatrix, 0, transMatrix, 0);
+//
+//        //Scale battery bar
+        mBattery.draw(mBatteryLevel);
 
     }
+
+    private void drawHorizonFrame(){
+
+        //  mHorizon.draw();
+
+
+    }
+
 
     public void onSurfaceChanged(GL10 unused, int width, int height) {
         // Adjust the viewport based on geometry changes,

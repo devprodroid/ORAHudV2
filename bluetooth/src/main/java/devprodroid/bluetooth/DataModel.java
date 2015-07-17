@@ -25,11 +25,12 @@ public class DataModel {
     private Integer rollCompensation=0;
 
     //from AltitudeListener
-    private int altitude =0;
+    private Integer altitude =0;
 
     //from BatteryListener
-    private int batteryLevel=0;
-    private int voltage=0;
+    private Integer batteryLevel=0;
+    private Integer voltage=0;
+    private Integer accZ=0;
 
 
     public DataModel() {
@@ -95,6 +96,7 @@ public class DataModel {
         FlightData[5] = altitude;
 
         FlightData[6] = batteryLevel;
+        FlightData[7] = accZ;
 
     }
 
@@ -110,9 +112,7 @@ public class DataModel {
         altitude = FlightData[5];
 
         batteryLevel = FlightData[6];
-
-
-
+        accZ =FlightData[7];
 
     }
 
@@ -184,12 +184,22 @@ public class DataModel {
         return batteryLevel;
     }
 
-    public void setVoltage(int voltage) {
+    public void setVoltage(Integer voltage) {
         this.voltage = voltage;
         linkValuesToArrayIndices();
     }
 
+    public Integer getAccZ() {
+        return accZ;
+    }
+
+
     public int getVoltage() {
         return voltage;
+    }
+
+    public void setAccZ(Integer accZ) {
+        this.accZ = accZ;
+        linkValuesToArrayIndices();
     }
 }

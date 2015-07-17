@@ -10,6 +10,7 @@
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
+
     <application
         android:name=".YADroneApplication"
         android:allowBackup="true"
@@ -27,6 +28,8 @@
         </activity>
         <activity
             android:name=".ControlActivity"
+            android:screenOrientation="landscape"
+            android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/title_activity_control"></activity>
     </application>
 

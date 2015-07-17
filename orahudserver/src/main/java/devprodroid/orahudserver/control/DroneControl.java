@@ -1,12 +1,14 @@
-package devprodroid.orahudserver;
+package devprodroid.orahudserver.control;
 
 import android.util.Log;
 
 import de.yadrone.base.IARDrone;
 import de.yadrone.base.command.CommandManager;
 
+
 /**
- * Created by robert on 15.07.15.
+ * This class controlls the movement of the drone with a thread
+ * computing the movement from the roll and pitch values set externally for the calling class
  */
 public class DroneControl implements Runnable {
     private boolean running = false;
@@ -25,6 +27,11 @@ public class DroneControl implements Runnable {
     private final String TAG = getClass().getPackage().getName();
     private final int controlMultiplier = 2;
 
+    /**
+     * Time to sleep between commands
+     */
+    private final int sleepDuration = 100;
+
     private Thread myThread;
 
     public DroneControl(IARDrone aDrone) {
@@ -33,6 +40,9 @@ public class DroneControl implements Runnable {
         startThread();
     }
 
+    /**
+     * Start the Command Runner Thread
+     */
     public void startThread() {
         running = true;
         myThread = new Thread(this);
@@ -40,6 +50,9 @@ public class DroneControl implements Runnable {
 
     }
 
+    /**
+     * Stop the Command Runner thread
+     */
     public void stopThread() {
         running = false;
         land();
@@ -58,41 +71,34 @@ public class DroneControl implements Runnable {
 
     @Override
     public void run() {
-
+    boolean performAction=false;
 // (cmd.isConnected())
         while ((running)) {
             if (true) {
 
 
-                if (getPitch_angleNormed() > 20) {
-                    //back
-                    cmd.backward(getPitch_angleControl());
-                    Log.e("Command", "back: "+ getPitch_angleControl());
-                } else if (getPitch_angleNormed()<-20){
-                    //forward
-                    cmd.forward(getPitch_angleControl());
-                    Log.e("Command", "forward: "+ getPitch_angleControl());
-                }
+                //Pitch movement
+                performAction=pitchUpDown();
 
-                if (getRoll_angleNormed() > 20) {
-                    //right
-                    cmd.goRight(getRoll_angleControl());
-                    Log.e("Command", "right: "+ getRoll_angleControl());
-                } else if (getRoll_angleNormed() < -20) {
-                    //left
-                    cmd.goLeft(getRoll_angleControl());
-                    Log.e("Command", "left: "+ getRoll_angleControl());
-
-                }
+                //Roll Movement
+                performAction= performAction||rollLeftRight();
 
                 //We sleep for 20ms for performance reasons
-                sleep(20);
+
+
+                //TODO: this is experimental and may lead to wired behavior of the drone, however we want to make sure that the drone hovers
+
+                if (!performAction){
+                    hover();
+                }
 
                 //spin left
                 //spin right
 
                 //up
                 //down
+                sleep(sleepDuration);
+
 
 
                 //if the Controller is not connected, the Drone needs to land, so that nothing
@@ -108,7 +114,40 @@ public class DroneControl implements Runnable {
     }
 
 
-    //let sleep
+    private boolean pitchUpDown() {
+
+        if (getPitch_angleNormed() > 20) {
+            //back
+            cmd.backward(getPitch_angleControl());
+            Log.e("Command", "back: " + getPitch_angleControl());
+            return true;
+        } else if (getPitch_angleNormed() < -20) {
+            //forward
+            cmd.forward(getPitch_angleControl());
+            Log.e("Command", "forward: " + getPitch_angleControl());
+            return false;
+        }
+        return false;
+    }
+
+    private boolean rollLeftRight(){
+
+        if (getRoll_angleNormed() > 20) {
+            //right
+            cmd.goRight(getRoll_angleControl());
+            Log.e("Command", "right: " + getRoll_angleControl());
+            return true;
+        } else if (getRoll_angleNormed() < -20) {
+            //left
+            cmd.goLeft(getRoll_angleControl());
+            Log.e("Command", "left: " + getRoll_angleControl());
+            return true;
+
+        }
+        return false;
+    }
+
+    //let the thread sleep
     private void sleep(long millis) {
         try {
             Thread.sleep(millis);
@@ -121,18 +160,26 @@ public class DroneControl implements Runnable {
         return pitch_angle;
     }
 
+
+    /**
+     * @return The pitch angle multiplied by 10 and rounded to int
+     */
     public int getPitch_angleNormed() {
-        return Math.round(pitch_angle*10);
+        return Math.round(pitch_angle * 10);
     }
+
+    /**
+     * @return Pitch angle as int with controlMultiplier applied
+     */
     public int getPitch_angleControl() {
         return Math.abs(Math.round(pitch_angle * controlMultiplier));
     }
 
 
-
     public void setPitch_angle(float pitch_angle) {
         this.pitch_angle = pitch_angle;
     }
+
     /**
      * @return Pitch angle as int with controlMultiplier applied
      */
@@ -140,8 +187,11 @@ public class DroneControl implements Runnable {
         return roll_angle;
     }
 
+    /**
+     * @return The roll angle multiplied by 10 and rounded to int
+     */
     public int getRoll_angleNormed() {
-        return Math.round(roll_angle*10);
+        return Math.round(roll_angle * 10);
     }
 
 
@@ -156,6 +206,10 @@ public class DroneControl implements Runnable {
         this.roll_angle = roll_angle;
     }
 
+
+    /**
+     * @return isFlying state of the drone
+     */
     public boolean isFlying() {
         return isFlying;
     }
@@ -165,6 +219,9 @@ public class DroneControl implements Runnable {
     }
 
 
+    /**
+     * takeoff and set isFlying true
+     */
     public void takeoff() {
         if (!isFlying()) {
             drone.takeOff();
@@ -173,6 +230,9 @@ public class DroneControl implements Runnable {
 
     }
 
+    /**
+     * land and set isFlying false
+     */
     public void land() {
         if (isFlying()) {
             drone.landing();
@@ -180,6 +240,9 @@ public class DroneControl implements Runnable {
         }
     }
 
+    /**
+     * let the drone hover
+     */
     public void hover() {
         drone.hover();
         Log.e(TAG, "Hover: ");

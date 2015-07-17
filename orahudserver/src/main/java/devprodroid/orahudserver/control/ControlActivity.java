@@ -1,4 +1,4 @@
-package devprodroid.orahudserver;
+package devprodroid.orahudserver.control;
 
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
@@ -39,44 +39,33 @@ import devprodroid.bluetooth.BTClient;
 import devprodroid.bluetooth.BTMessage;
 import devprodroid.bluetooth.BTSocketListener;
 import devprodroid.bluetooth.DataModel;
+import devprodroid.orahudserver.R;
+import devprodroid.orahudserver.YADroneApplication;
 
 
 /**
  * This Activity displays Control interface and informations for the droneii
  */
-public class ControlActivity extends AppCompatActivity implements SensorEventListener, BTSocketListener.Callback, AttitudeListener,AltitudeListener, BatteryListener, AcceleroListener {
+public class ControlActivity extends AppCompatActivity implements SensorEventListener, BTSocketListener.Callback, AttitudeListener, AltitudeListener, BatteryListener, AcceleroListener {
 
 
     public final static String MSG_BT_UUID = "MSG_BT_UUID";
     public final static String MSG_MAC_BT_DEVICE_ADDRESS = "MSG_MAC_BT_DEVICE_ADDRESS";
+    private final static int INTERVAL = 500;
     private final String TAG = getClass().getPackage().getName();
+    Handler mHandler;
     private boolean connected = false;
-
     private BluetoothDevice device;
-
     private BTClient mBTClient;
     private Boolean btSending = false;
     private ProgressDialog mProgressDialog;
-
     private TextView tvText;
-
     private DataModel mdataModel;
-
     private DroneControl mDroneControl;
-
     private YADroneApplication mApp;
     private IARDrone mDrone;
-
-    private final static int INTERVAL = 500;
-    Handler mHandler;
-
-
-
-
     private SensorManager mSensorManager;
     private Sensor mSensor;
-
-
 
 
     public static byte[] float2ByteArray(float value) {
@@ -88,40 +77,48 @@ public class ControlActivity extends AppCompatActivity implements SensorEventLis
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_control);
 
-        //register Orientation sensor
-        mSensorManager = (SensorManager) getSystemService(this.getBaseContext().SENSOR_SERVICE);
-        mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        registerSensors();
 
+        initDrone();
+
+        initButtons();
+
+        initDataModel();
+
+        initBluetoothConnection();
+
+    }
+
+
+    /**
+     * get drone reference and create DroneControl instance
+     */
+    private void initDrone() {
         mApp = (YADroneApplication) getApplication();
+
         mDrone = mApp.getARDrone();
         mDroneControl = new DroneControl(mDrone);
+    }
 
-        if (mSensor != null) {
-            // Success! There's an accelerometer
-            mSensorManager.registerListener(this, mSensor,
-                    SensorManager.SENSOR_DELAY_FASTEST);
-        } else {
-            Toast.makeText(this, "This device doesnt support STRING_TYPE_ACCELEROMETER",
-                    Toast.LENGTH_SHORT).show();
-            //stopSelf();
-        }
+    /**
+     * Create DataModel Instance
+     */
+    private void initDataModel() {
+        mdataModel = new DataModel();
+    }
 
-
+    /**
+     * Connect to Bluetooth device
+     */
+    private void initBluetoothConnection() {
         //TODO: Runtime configuration changes have to be acknowledged
-       //TODO: Implement reconnection mechanism
+        //TODO: Implement reconnection mechanism
         BluetoothAdapter ba = BluetoothAdapter.getDefaultAdapter();
 
         //Param reading
         Intent act_param = this.getIntent();
         final String macBTDeviceAddress = act_param.getStringExtra(MSG_MAC_BT_DEVICE_ADDRESS);
         final UUID serv_UUID = UUID.fromString(act_param.getStringExtra(MSG_BT_UUID));
-
-
-        
-        //tvText = (TextView) findViewById(R.id.text_navdata);
-
-        initButtons();
-        mdataModel = new DataModel();
 
 
         if (true) {
@@ -157,76 +154,40 @@ public class ControlActivity extends AppCompatActivity implements SensorEventLis
                         Log.e(TAG, e.getMessage(), e);
 
                         finish();
-                    }
-                    finally {
+                    } finally {
                         mProgressDialog.dismiss();
                     }
                 }
 
-                ;
             }.start();
         }
-
-
-       //// WindowManager mWindowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
-       // Display mDisplay = mWindowManager.getDefaultDisplay();
-
-       // Log.d("ORIENTATION_TEST", "getOrientation(): " + mDisplay.getRotation());
-
     }
 
+    /**
+     * register SensorManager and Listener for Accelerometer
+     */
+    private void registerSensors() {
+        //register Orientation sensor
+        mSensorManager = (SensorManager) getSystemService(this.getBaseContext().SENSOR_SERVICE);
+        mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+
+
+        if (mSensor != null) {
+            // Success! There's an accelerometer
+            mSensorManager.registerListener(this, mSensor,
+                    SensorManager.SENSOR_DELAY_FASTEST);
+        } else {
+            Toast.makeText(this, "This device doesnt support STRING_TYPE_ACCELEROMETER",
+                    Toast.LENGTH_SHORT).show();
+            //stopSelf();
+        }
+    }
+
+    /**
+     * Assign buttons to drone actions.
+     * TODO: Put methods in droneControl
+     */
     private void initButtons() {
-
-
-//        Button forward = (Button) findViewById(R.id.cmd_forward);
-//        forward.setOnTouchListener(new OnTouchListener() {
-//            public boolean onTouch(View v, MotionEvent event) {
-//                if (event.getAction() == MotionEvent.ACTION_DOWN)
-//                    mDrone.getCommandManager().forward(20);
-//                else if (event.getAction() == MotionEvent.ACTION_UP)
-//                    mDroneControl.hover();
-//
-//                return true;
-//            }
-//        });
-//
-//        Button backward = (Button) findViewById(R.id.cmd_backward);
-//        backward.setOnTouchListener(new OnTouchListener() {
-//            public boolean onTouch(View v, MotionEvent event) {
-//                if (event.getAction() == MotionEvent.ACTION_DOWN)
-//                    mDrone.getCommandManager().backward(20);
-//                else if (event.getAction() == MotionEvent.ACTION_UP)
-//                    mDroneControl.hover();
-//
-//                return true;
-//            }
-//        });
-//
-//
-//        Button left = (Button) findViewById(R.id.cmd_left);
-//        left.setOnTouchListener(new OnTouchListener() {
-//            public boolean onTouch(View v, MotionEvent event) {
-//                if (event.getAction() == MotionEvent.ACTION_DOWN)
-//                    mDrone.getCommandManager().goLeft(20);
-//                else if (event.getAction() == MotionEvent.ACTION_UP)
-//                    mDroneControl.hover();
-//
-//                return true;
-//            }
-//        });
-//
-//
-//        Button right = (Button) findViewById(R.id.cmd_right);
-//        right.setOnTouchListener(new OnTouchListener() {
-//            public boolean onTouch(View v, MotionEvent event) {
-//                if (event.getAction() == MotionEvent.ACTION_DOWN)
-//                    mDrone.getCommandManager().goRight(20);
-//                else if (event.getAction() == MotionEvent.ACTION_UP)
-//                    mDroneControl.hover();
-//
-//                return true;
-//            }
-//        });
 
         Button up = (Button) findViewById(R.id.cmd_up);
         up.setOnTouchListener(new OnTouchListener() {
@@ -304,7 +265,6 @@ public class ControlActivity extends AppCompatActivity implements SensorEventLis
     }
 
 
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -331,12 +291,16 @@ public class ControlActivity extends AppCompatActivity implements SensorEventLis
         super.onResume();
 
         addDroneListeners();
+
         mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_FASTEST);
 
         mDroneControl.startThread();
 
     }
 
+    /**
+     * Register for drone listeners
+     */
     private void addDroneListeners() {
         YADroneApplication app = (YADroneApplication) getApplication();
         IARDrone drone = app.getARDrone();
@@ -352,11 +316,15 @@ public class ControlActivity extends AppCompatActivity implements SensorEventLis
         mDroneControl.stopThread();
 
         removeDroneListeners();
+
         mSensorManager.unregisterListener(this);
 
 
     }
 
+    /**
+     * unregister drone listeners
+     */
     private void removeDroneListeners() {
         YADroneApplication app = (YADroneApplication) getApplication();
         IARDrone drone = app.getARDrone();
@@ -366,12 +334,13 @@ public class ControlActivity extends AppCompatActivity implements SensorEventLis
         drone.getNavDataManager().removeAcceleroListener(this);
     }
 
+
     public void attitudeUpdated(final float pitch, final float roll, final float yaw) {
 
         mdataModel.setPitch(Math.round(pitch / 1000));
         mdataModel.setRoll(Math.round(roll / 1000));
         mdataModel.setYaw(Math.round(yaw / 1000));
-        new SendtoBT().execute( );
+        new SendtoBT().execute();
     }
 
     public void attitudeUpdated(float arg0, float arg1) {
@@ -425,7 +394,7 @@ public class ControlActivity extends AppCompatActivity implements SensorEventLis
 
     @Override
     public void receivedAltitude(int altitude) {
-       mdataModel.setAltitude(0);
+        mdataModel.setAltitude(0);
     }
 
     @Override
@@ -436,7 +405,7 @@ public class ControlActivity extends AppCompatActivity implements SensorEventLis
     @Override
     public void batteryLevelChanged(int batteryLevel) {
         mdataModel.setBatteryLevel(batteryLevel);
-       // Log.e(TAG, "Batterylevel: " +( (Integer) batteryLevel).toString());
+        // Log.e(TAG, "Batterylevel: " +( (Integer) batteryLevel).toString());
     }
 
     @Override
@@ -451,7 +420,7 @@ public class ControlActivity extends AppCompatActivity implements SensorEventLis
 
     @Override
     public void receivedPhysData(AcceleroPhysData acceleroPhysData) {
-        float tmp=acceleroPhysData.getPhysAccs()[2];
+        float tmp = acceleroPhysData.getPhysAccs()[2];
         mdataModel.setAccZ(Math.round(tmp));
 
     }
@@ -459,9 +428,9 @@ public class ControlActivity extends AppCompatActivity implements SensorEventLis
     @Override
     public void onSensorChanged(SensorEvent event) {
 
-     //   float azimuth_angle = event.values[0];
-       // float pitch_angle = event.values[1];-3 +3
-      //  float roll_angle = event.values[2];
+        //   float azimuth_angle = event.values[0];
+        // float pitch_angle = event.values[1];-3 +3
+        //  float roll_angle = event.values[2];
 
 
         TextView tv = (TextView) findViewById(R.id.tv);
@@ -470,8 +439,7 @@ public class ControlActivity extends AppCompatActivity implements SensorEventLis
                 "Orientation Z (Yaw) :" + Float.toString(event.values[0]));
 
 
-
-    //landscape config
+        //landscape config
 
         mDroneControl.setPitch_angle(event.values[0]);
         mDroneControl.setRoll_angle(event.values[1]);
@@ -484,7 +452,7 @@ public class ControlActivity extends AppCompatActivity implements SensorEventLis
     }
 
 
-    private class SendtoBT extends AsyncTask<Float, Void ,Boolean> {
+    private class SendtoBT extends AsyncTask<Float, Void, Boolean> {
 
         @Override
         protected Boolean doInBackground(Float... params) {
@@ -513,7 +481,6 @@ public class ControlActivity extends AppCompatActivity implements SensorEventLis
             return true;
         }
     }
-
 
 
 }

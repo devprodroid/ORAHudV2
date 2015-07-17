@@ -15,7 +15,7 @@
 
 ******************************************************************************/
 
-package devprodroid.orahudserver;
+package devprodroid.orahudserver.connection;
 
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
@@ -26,6 +26,8 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import java.util.List;
+
+import devprodroid.orahudserver.R;
 
 public class BTListAdapter extends BaseAdapter {
 

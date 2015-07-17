@@ -39,7 +39,6 @@ public class BTClient implements Closeable {
             try {
                 this.socket.close();
             } catch (IOException var2) {
-                ;
             }
         }
 

@@ -52,7 +52,6 @@ public class BTSocketListener extends Thread {
         try {
             this.socket.close();
         } catch (IOException var2) {
-            ;
         }
 
     }

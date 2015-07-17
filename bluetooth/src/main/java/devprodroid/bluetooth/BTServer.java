@@ -67,7 +67,6 @@ public class BTServer extends Thread {
         try {
             this.serverSocket.close();
         } catch (IOException var2) {
-            ;
         }
 
     }

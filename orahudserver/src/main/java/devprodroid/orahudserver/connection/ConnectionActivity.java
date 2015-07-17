@@ -1,4 +1,4 @@
-package devprodroid.orahudserver;
+package devprodroid.orahudserver.connection;
 
 import android.app.AlertDialog;
 import android.app.Fragment;
@@ -31,6 +31,9 @@ import java.util.Set;
 import java.util.UUID;
 
 import de.yadrone.base.IARDrone;
+import devprodroid.orahudserver.R;
+import devprodroid.orahudserver.YADroneApplication;
+import devprodroid.orahudserver.control.ControlActivity;
 
 
 public class ConnectionActivity extends AppCompatActivity {
@@ -125,7 +128,7 @@ public class ConnectionActivity extends AppCompatActivity {
                 if (intent.getAction().equals(BluetoothDevice.ACTION_UUID)) {
 
                     Bundle bdl = intent.getExtras();
-                    BluetoothDevice btDevice = (BluetoothDevice) bdl
+                    BluetoothDevice btDevice = bdl
                             .getParcelable(BluetoothDevice.EXTRA_DEVICE);
 
                     Log.e(TAG, "ACTION_UUID event received. Searching through available UUID on "

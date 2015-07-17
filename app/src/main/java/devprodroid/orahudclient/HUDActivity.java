@@ -312,7 +312,9 @@ public class HUDActivity extends Activity {
         super.onResume();
 
         registerReceiver(broadcastReceiver, new IntentFilter(BT_Service.BROADCAST_ACTION));
+
         startBTService();
+
         glSurfaceView.onResume();
     }
 
@@ -322,7 +324,9 @@ public class HUDActivity extends Activity {
         glSurfaceView.onPause();
         unregisterReceiver(broadcastReceiver);
 
-        // stopService(serviceIntent);
+        if (isBtServiceRunning()) {
+            stopService(serviceIntent);
+        }
     }
 
 
@@ -339,7 +343,7 @@ public class HUDActivity extends Activity {
         // Update UI Elements
 
         final TextView tvText = (TextView) findViewById(R.id.tv2);
-        tvText.setText("Roll: " + dataModel.getRoll().toString());
+        tvText.setText("Accelero: " + dataModel.getAccZ().toString());
 
 
 

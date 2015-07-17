@@ -1,5 +1,6 @@
 package devprodroid.orahudserver;
 
+import android.annotation.SuppressLint;
 import android.app.Application;
 
 import de.yadrone.base.ARDrone;
@@ -12,10 +13,10 @@ public class YADroneApplication extends Application
      */
     private IARDrone drone;
 
+    @SuppressLint("MissingSuperCall")
     public void onCreate()
     {
-        super.onCreate();
-        drone = new ARDrone("192.168.1.1", null); // null because of missing video support on Android
+       drone = new ARDrone("192.168.1.1", null); // null because of missing video support on Android
     }
 
     public IARDrone getARDrone()

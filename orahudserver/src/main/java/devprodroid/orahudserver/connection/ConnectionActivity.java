@@ -1,7 +1,6 @@
 package devprodroid.orahudserver.connection;
 
 import android.app.AlertDialog;
-import android.app.Fragment;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
@@ -9,17 +8,17 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.ParcelUuid;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -31,12 +30,14 @@ import java.util.Set;
 import java.util.UUID;
 
 import de.yadrone.base.IARDrone;
+import de.yadrone.base.navdata.BatteryListener;
+import de.yadrone.base.navdata.WifiListener;
 import devprodroid.orahudserver.R;
 import devprodroid.orahudserver.YADroneApplication;
 import devprodroid.orahudserver.control.ControlActivity;
 
 
-public class ConnectionActivity extends AppCompatActivity {
+public class ConnectionActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener, BatteryListener, WifiListener {
 
 
     private static final String TAG = ConnectionActivity.class.getName();
@@ -45,12 +46,24 @@ public class ConnectionActivity extends AppCompatActivity {
     private static final UUID serv_UUID = UUID.fromString("07419c1a-090c-11e5-a6c0-1697f925ec7b");
     List<BluetoothDevice> validDevices = new ArrayList<>();
 
+    BroadcastReceiver handler;
+
     ListView devListView;
+    private SwipeRefreshLayout swipeLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_connection);
+
+        swipeLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_container);
+        swipeLayout.setOnRefreshListener(this);
+        swipeLayout.setColorScheme(android.R.color.holo_blue_bright,
+                android.R.color.holo_green_light,
+                android.R.color.holo_orange_light,
+                android.R.color.holo_red_light);
+
+
         //Add WIfi for Drone Connection
 
         initializeWifi();
@@ -60,8 +73,16 @@ public class ConnectionActivity extends AppCompatActivity {
 
     private void initializeWifi() {
         WifiManager wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+
         final TextView text = (TextView) findViewById(R.id.text_init);
-        text.append(wifi.getConnectionInfo().getSSID());
+        String WifiSSID = wifi.getConnectionInfo().getSSID();
+        text.setText("Connected to: " + WifiSSID);
+        text.setTextColor(Color.BLACK);
+
+        if (WifiSSID.contains("ardrone")) {
+            text.setText("Connected to AR.Drone");
+            text.setTextColor(Color.GREEN);
+        }
 
 
     }
@@ -73,7 +94,6 @@ public class ConnectionActivity extends AppCompatActivity {
         try {
             Log.e(TAG, "Initialize the drone ..");
             drone.start();
-
 
 
         } catch (Exception exc) {
@@ -111,16 +131,37 @@ public class ConnectionActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
+
+        YADroneApplication app = (YADroneApplication) getApplication();
+        IARDrone drone = app.getARDrone();
+        drone.getNavDataManager().addWifiListener(this);
+        drone.getNavDataManager().removeBatteryListener(this);
+        drone.stop();
+
+        unregisterReceiver(handler);
+        finish();
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        YADroneApplication app = (YADroneApplication) getApplication();
+        IARDrone drone = app.getARDrone();
+        drone.getNavDataManager().addWifiListener(this);
+        drone.getNavDataManager().addBatteryListener(this);
+    }
+
 
     @Override
     protected void onStart() {
         super.onStart();
-        devListView = (ListView) findViewById(R.id.bt_listview);
+        devListView = (ListView) findViewById(R.id.bt_list);
 
 
         //Create a broadcastreceiver that is trigerred asynchronously after a call to fetchUuidsWithSdp() call.
-        BroadcastReceiver handler = new BroadcastReceiver() {
+
+        handler = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
 
@@ -131,10 +172,15 @@ public class ConnectionActivity extends AppCompatActivity {
                     BluetoothDevice btDevice = bdl
                             .getParcelable(BluetoothDevice.EXTRA_DEVICE);
 
-                    Log.e(TAG, "ACTION_UUID event received. Searching through available UUID on "
-                            + btDevice.getAddress());
+                    if (btDevice != null) {
+                        Log.e(TAG, "ACTION_UUID event received. Searching through available UUID on "
+                                + btDevice.getAddress());
+                    }
 
-                    ParcelUuid[] puList = btDevice.getUuids();
+                    ParcelUuid[] puList = new ParcelUuid[0];
+                    if (btDevice != null) {
+                        puList = btDevice.getUuids();
+                    }
 
                     // Search our UUID server through the list of available UUID
                     // on the remote device
@@ -208,73 +254,54 @@ public class ConnectionActivity extends AppCompatActivity {
      * in the listview on this GUI.
      */
     private void RefreshDeviceList() {
-        BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        try {
+            BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
-        //Flush the list of valid devices
-        validDevices.clear();
+            //Flush the list of valid devices
+            validDevices.clear();
 
-        if (mBluetoothAdapter == null)
-            Log.e("BTDeviceDiscover", "No bluetooth adapter detected/available.");
+            if (mBluetoothAdapter == null)
+                Log.e("BTDeviceDiscover", "No bluetooth adapter detected/available.");
 
-        //Get the list of paired devices.
-        Set<BluetoothDevice> devList = mBluetoothAdapter.getBondedDevices();
+            //Get the list of paired devices.
+            Set<BluetoothDevice> devList = null;
+            if (mBluetoothAdapter != null) {
+                devList = mBluetoothAdapter.getBondedDevices();
+            }
 
-        //Check if bluetooth is enabled.
-        if (!mBluetoothAdapter.isEnabled()) {
-            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+            //Check if bluetooth is enabled.
+            if (mBluetoothAdapter != null) {
+                if (!mBluetoothAdapter.isEnabled()) {
+                    Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                    startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
 
-            Log.e("BTDeviceDiscover", "Bluetooth is DISABLED. Asking the user");
-            return;
-        }
+                    Log.e("BTDeviceDiscover", "Bluetooth is DISABLED. Asking the user");
+                    return;
+                }
+            }
 
-        for (BluetoothDevice btDevice : devList) {
-            //Refresh the list of UUID on the remote device. !!!!ASYNCHRONE
-            Log.e(TAG, "READING FROM " + btDevice.getAddress());
-            btDevice.fetchUuidsWithSdp();
+            if (devList != null) {
+                for (BluetoothDevice btDevice : devList) {
+                    //Refresh the list of UUID on the remote device. !!!!ASYNCHRONE
+                    Log.e(TAG, "READING FROM " + btDevice.getAddress());
+                    btDevice.fetchUuidsWithSdp();
+                }
+            }
+        } finally {
+            swipeLayout.setRefreshing(false);
         }
     }
 
     /**
      * Callback for the refresh button.
-     *
-     * @param v
      */
     public void onBtnClicked(View v) {
-        if (v.getId() == R.id.btn_refresh) {
-            RefreshDeviceList();
-        }
+
         if (v.getId() == R.id.btnDrone) {
-                initializeDrone();
+            initializeDrone();
         }
     }
 
-    private void startControlActivity() {
-        //Start the main activity
-        Intent intent = new Intent(this, ControlActivity.class);
-
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-
-        startActivity(intent);
-    }
-
-
-    /**
-     * A placeholder fragment containing a simple view.
-     */
-    public static class PlaceholderFragment extends Fragment {
-
-        public PlaceholderFragment() {
-        }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.activity_connection,
-                    container, false);
-            return rootView;
-        }
-    }
 
     /**
      * Upon pressing the BACK-button, the user has to confirm the connection to the drone is taken down.
@@ -301,5 +328,32 @@ public class ConnectionActivity extends AppCompatActivity {
         return super.onKeyDown(keyCode, event);
     }
 
+    /**
+     * SwipeRefreshLayout listener
+     */
+    @Override
+    public void onRefresh() {
 
+        RefreshDeviceList();
+//        new Handler().postDelayed(new Runnable() {
+//            @Override public void run() {
+//                swipeLayout.setRefreshing(false);
+//            }
+//        }, 5000);
+    }
+
+    @Override
+    public void batteryLevelChanged(int i) {
+
+    }
+
+    @Override
+    public void voltageChanged(int i) {
+
+    }
+
+    @Override
+    public void received(long l) {
+        Log.d(TAG, "AR.Drone Wifi: " + l);
+    }
 }

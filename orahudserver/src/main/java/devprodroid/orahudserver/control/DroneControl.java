@@ -33,6 +33,9 @@ public class DroneControl implements Runnable {
     private final int sleepDuration = 100;
 
     private Thread myThread;
+    private boolean translateMode;
+    private boolean rotateUpDownMode;
+
 
     public DroneControl(IARDrone aDrone) {
         drone = aDrone;
@@ -71,24 +74,38 @@ public class DroneControl implements Runnable {
 
     @Override
     public void run() {
-    boolean performAction=false;
+
+    //if no action is performed, the drone shall hover
+    boolean performAction= false;
+
+
 // (cmd.isConnected())
-        while ((running)) {
-            if (true) {
+        while ((running) && (cmd.isConnected())) {
 
+            if (isFlying()) {
 
-                //Pitch movement
-                performAction=pitchUpDown();
+                if (isTranslateMode()) {
+                    //Pitch movement
+                    performAction = pitchUpDown();
 
-                //Roll Movement
-                performAction= performAction||rollLeftRight();
+                    //Roll Movement
+                    performAction = performAction || rollLeftRight();
+                }
+                else
+                if (isRotateUpDownMode()){
+                    //Pitch movement
+                    performAction = goUpDown();
+
+                    //Roll Movement
+                    performAction = performAction || spinLeftRight();
+                }
 
                 //We sleep for 20ms for performance reasons
 
 
                 //TODO: this is experimental and may lead to wired behavior of the drone, however we want to make sure that the drone hovers
 
-                if (!performAction){
+                if (!performAction) {
                     hover();
                 }
 
@@ -98,7 +115,6 @@ public class DroneControl implements Runnable {
                 //up
                 //down
                 sleep(sleepDuration);
-
 
 
                 //if the Controller is not connected, the Drone needs to land, so that nothing
@@ -119,13 +135,29 @@ public class DroneControl implements Runnable {
         if (getPitch_angleNormed() > 20) {
             //back
             cmd.backward(getPitch_angleControl());
-            Log.e("Command", "back: " + getPitch_angleControl());
+            Log.e("Command", "backward: " + getPitch_angleControl());
             return true;
         } else if (getPitch_angleNormed() < -20) {
             //forward
             cmd.forward(getPitch_angleControl());
             Log.e("Command", "forward: " + getPitch_angleControl());
-            return false;
+            return true;
+        }
+        return false;
+    }
+
+    private boolean goUpDown() {
+
+        if (getPitch_angleNormed() > 20) {
+            //back
+            cmd.up(getPitch_angleControl());
+            Log.e("Command", "up: " + getPitch_angleControl());
+            return true;
+        } else if (getPitch_angleNormed() < -20) {
+            //forward
+            cmd.down(getPitch_angleControl());
+            Log.e("Command", "down: " + getPitch_angleControl());
+            return true;
         }
         return false;
     }
@@ -135,12 +167,29 @@ public class DroneControl implements Runnable {
         if (getRoll_angleNormed() > 20) {
             //right
             cmd.goRight(getRoll_angleControl());
-            Log.e("Command", "right: " + getRoll_angleControl());
+            Log.e("Command", "goRight: " + getRoll_angleControl());
             return true;
         } else if (getRoll_angleNormed() < -20) {
             //left
             cmd.goLeft(getRoll_angleControl());
-            Log.e("Command", "left: " + getRoll_angleControl());
+            Log.e("Command", "goLeft: " + getRoll_angleControl());
+            return true;
+
+        }
+        return false;
+    }
+
+    private boolean spinLeftRight(){
+
+        if (getRoll_angleNormed() > 20) {
+            //right
+            cmd.spinRight(getRoll_angleControl());
+            Log.e("Command", "spin right: " + getRoll_angleControl());
+            return true;
+        } else if (getRoll_angleNormed() < -20) {
+            //left
+            cmd.spinLeft(getRoll_angleControl());
+            Log.e("Command", "spin left: " + getRoll_angleControl());
             return true;
 
         }
@@ -246,5 +295,21 @@ public class DroneControl implements Runnable {
     public void hover() {
         drone.hover();
         Log.e(TAG, "Hover: ");
+    }
+
+    public boolean isTranslateMode() {
+        return translateMode;
+    }
+
+    public void setTranslateMode(boolean translateMode) {
+        this.translateMode = translateMode;
+    }
+
+    public boolean isRotateUpDownMode() {
+        return rotateUpDownMode;
+    }
+
+    public void setRotateUpDownMode(boolean rotateUpDownMode) {
+        this.rotateUpDownMode = rotateUpDownMode;
     }
 }

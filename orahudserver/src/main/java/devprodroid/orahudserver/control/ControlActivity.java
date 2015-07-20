@@ -15,10 +15,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnTouchListener;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -150,10 +148,11 @@ public class ControlActivity extends AppCompatActivity implements SensorEventLis
                         showMsg("Connection successful!");
 
                     } catch (IOException e) {
-                        showMsg(e.getMessage());
+                       // showMsg(e.getMessage());
                         Log.e(TAG, e.getMessage(), e);
+                        showMsg("Connection not successful! Make sure Hud Client is running");
 
-                        finish();
+                       // finish();
                     } finally {
                         mProgressDialog.dismiss();
                     }
@@ -188,57 +187,57 @@ public class ControlActivity extends AppCompatActivity implements SensorEventLis
      * TODO: Put methods in droneControl
      */
     private void initButtons() {
-
-        Button up = (Button) findViewById(R.id.cmd_up);
-        up.setOnTouchListener(new OnTouchListener() {
-            public boolean onTouch(View v, MotionEvent event) {
-                if (event.getAction() == MotionEvent.ACTION_DOWN)
-                    mDrone.getCommandManager().up(40);
-                else if (event.getAction() == MotionEvent.ACTION_UP)
-                    mDroneControl.hover();
-
-                return true;
-            }
-        });
-
-        Button down = (Button) findViewById(R.id.cmd_down);
-        down.setOnTouchListener(new OnTouchListener() {
-            public boolean onTouch(View v, MotionEvent event) {
-                if (event.getAction() == MotionEvent.ACTION_DOWN)
-                    mDrone.getCommandManager().down(40);
-                else if (event.getAction() == MotionEvent.ACTION_UP)
-                    mDroneControl.hover();
-
-                return true;
-            }
-        });
-
-
-        Button spinLeft = (Button) findViewById(R.id.cmd_spin_left);
-        spinLeft.setOnTouchListener(new OnTouchListener() {
-            public boolean onTouch(View v, MotionEvent event) {
-                if (event.getAction() == MotionEvent.ACTION_DOWN)
-                    mDrone.getCommandManager().spinLeft(20);
-
-                else if (event.getAction() == MotionEvent.ACTION_UP)
-                    mDroneControl.hover();
-
-                return true;
-            }
-        });
-
-
-        Button spinRight = (Button) findViewById(R.id.cmd_spin_right);
-        spinRight.setOnTouchListener(new OnTouchListener() {
-            public boolean onTouch(View v, MotionEvent event) {
-                if (event.getAction() == MotionEvent.ACTION_DOWN)
-                    mDrone.getCommandManager().spinRight(20);
-                else if (event.getAction() == MotionEvent.ACTION_UP)
-                    mDroneControl.hover();
-
-                return true;
-            }
-        });
+//
+//        Button up = (Button) findViewById(R.id.cmd_up);
+//        up.setOnTouchListener(new OnTouchListener() {
+//            public boolean onTouch(View v, MotionEvent event) {
+//                if (event.getAction() == MotionEvent.ACTION_DOWN)
+//                    mDrone.getCommandManager().up(40);
+//                else if (event.getAction() == MotionEvent.ACTION_UP)
+//                    mDroneControl.hover();
+//
+//                return true;
+//            }
+//        });
+//
+//        Button down = (Button) findViewById(R.id.cmd_down);
+//        down.setOnTouchListener(new OnTouchListener() {
+//            public boolean onTouch(View v, MotionEvent event) {
+//                if (event.getAction() == MotionEvent.ACTION_DOWN)
+//                    mDrone.getCommandManager().down(40);
+//                else if (event.getAction() == MotionEvent.ACTION_UP)
+//                    mDroneControl.hover();
+//
+//                return true;
+//            }
+//        });
+//
+//
+//        Button spinLeft = (Button) findViewById(R.id.cmd_spin_left);
+//        spinLeft.setOnTouchListener(new OnTouchListener() {
+//            public boolean onTouch(View v, MotionEvent event) {
+//                if (event.getAction() == MotionEvent.ACTION_DOWN)
+//                    mDrone.getCommandManager().spinLeft(20);
+//
+//                else if (event.getAction() == MotionEvent.ACTION_UP)
+//                    mDroneControl.hover();
+//
+//                return true;
+//            }
+//        });
+//
+//
+//        Button spinRight = (Button) findViewById(R.id.cmd_spin_right);
+//        spinRight.setOnTouchListener(new OnTouchListener() {
+//            public boolean onTouch(View v, MotionEvent event) {
+//                if (event.getAction() == MotionEvent.ACTION_DOWN)
+//                    mDrone.getCommandManager().spinRight(20);
+//                else if (event.getAction() == MotionEvent.ACTION_UP)
+//                    mDroneControl.hover();
+//
+//                return true;
+//            }
+//        });
 
         final Button landing = (Button) findViewById(R.id.cmd_landing);
         landing.setOnClickListener(new OnClickListener() {
@@ -302,13 +301,12 @@ public class ControlActivity extends AppCompatActivity implements SensorEventLis
      * Register for drone listeners
      */
     private void addDroneListeners() {
-        YADroneApplication app = (YADroneApplication) getApplication();
-        IARDrone drone = app.getARDrone();
 
-        drone.getNavDataManager().addAttitudeListener(this);
-        drone.getNavDataManager().addBatteryListener(this);
-        drone.getNavDataManager().addAltitudeListener(this);
-        drone.getNavDataManager().addAcceleroListener(this);
+
+        mDrone.getNavDataManager().addAttitudeListener(this);
+        mDrone.getNavDataManager().addBatteryListener(this);
+        mDrone.getNavDataManager().addAltitudeListener(this);
+        mDrone.getNavDataManager().addAcceleroListener(this);
     }
 
     public void onPause() {
@@ -318,6 +316,7 @@ public class ControlActivity extends AppCompatActivity implements SensorEventLis
         removeDroneListeners();
 
         mSensorManager.unregisterListener(this);
+        finish();
 
 
     }
@@ -326,12 +325,11 @@ public class ControlActivity extends AppCompatActivity implements SensorEventLis
      * unregister drone listeners
      */
     private void removeDroneListeners() {
-        YADroneApplication app = (YADroneApplication) getApplication();
-        IARDrone drone = app.getARDrone();
-        drone.getNavDataManager().removeAttitudeListener(this);
-        drone.getNavDataManager().removeBatteryListener(this);
-        drone.getNavDataManager().removeAltitudeListener(this);
-        drone.getNavDataManager().removeAcceleroListener(this);
+
+        mDrone.getNavDataManager().removeAttitudeListener(this);
+        mDrone.getNavDataManager().removeBatteryListener(this);
+        mDrone.getNavDataManager().removeAltitudeListener(this);
+        mDrone.getNavDataManager().removeAcceleroListener(this);
     }
 
 

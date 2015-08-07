@@ -103,8 +103,8 @@ public class ConnectionActivity extends AppCompatActivity implements SwipeRefres
         }
 
 
-        drone.getNavDataManager().addWifiListener(this);
-        drone.getNavDataManager().addBatteryListener(this);
+       // drone.getNavDataManager().addWifiListener(this);
+      //  drone.getNavDataManager().addBatteryListener(this);
 
 
     }
@@ -138,8 +138,8 @@ public class ConnectionActivity extends AppCompatActivity implements SwipeRefres
 
         YADroneApplication app = (YADroneApplication) getApplication();
         IARDrone drone = app.getARDrone();
-       drone.getNavDataManager().removeWifiListener(this);
-       drone.getNavDataManager().removeBatteryListener(this);
+      // drone.getNavDataManager().removeWifiListener(this);
+      // drone.getNavDataManager().removeBatteryListener(this);
        // drone.stop();
 
        //ccc
@@ -252,10 +252,12 @@ public class ConnectionActivity extends AppCompatActivity implements SwipeRefres
 @Override
     public void onDestroy() {
     super.onDestroy();
-    try {
-        unregisterReceiver(handler);
-    }
-    finally{}
+
+        if (handler!=null) {
+            //unregisterReceiver(handler);
+            handler=null;
+        }
+
 
 
         YADroneApplication app = (YADroneApplication) getApplication();

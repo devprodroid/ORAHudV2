@@ -12,12 +12,9 @@ import android.hardware.SensorManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
 import android.view.MotionEvent;
+import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.widget.Button;
@@ -36,6 +33,8 @@ import de.yadrone.base.navdata.Altitude;
 import de.yadrone.base.navdata.AltitudeListener;
 import de.yadrone.base.navdata.AttitudeListener;
 import de.yadrone.base.navdata.BatteryListener;
+import de.yadrone.base.navdata.MagnetoData;
+import de.yadrone.base.navdata.MagnetoListener;
 import devprodroid.bluetooth.BTClient;
 import devprodroid.bluetooth.BTMessage;
 import devprodroid.bluetooth.BTSocketListener;
@@ -47,7 +46,7 @@ import devprodroid.orahudserver.YADroneApplication;
 /**
  * This Activity displays Control interface and informations for the drone
  */
-public class ControlActivity extends Activity implements SensorEventListener, BTSocketListener.Callback, AttitudeListener, AltitudeListener, BatteryListener, AcceleroListener {
+public class ControlActivity extends Activity implements SensorEventListener, BTSocketListener.Callback, AttitudeListener, AltitudeListener, BatteryListener, AcceleroListener,MagnetoListener {
 
 
     public final static String MSG_BT_UUID = "MSG_BT_UUID";
@@ -371,6 +370,10 @@ public class ControlActivity extends Activity implements SensorEventListener, BT
         mDrone.getNavDataManager().addBatteryListener(this);
         mDrone.getNavDataManager().addAltitudeListener(this);
         mDrone.getNavDataManager().addAcceleroListener(this);
+        mDrone.getNavDataManager().addMagnetoListener(this);
+
+
+
     }
 
     public void onPause() {
@@ -394,6 +397,7 @@ public class ControlActivity extends Activity implements SensorEventListener, BT
         mDrone.getNavDataManager().removeBatteryListener(this);
         mDrone.getNavDataManager().removeAltitudeListener(this);
         mDrone.getNavDataManager().removeAcceleroListener(this);
+        mDrone.getNavDataManager().removeMagnetoListener(this);
     }
 
 
@@ -495,10 +499,10 @@ public class ControlActivity extends Activity implements SensorEventListener, BT
         //  float roll_angle = event.values[2];
 
 
-        TextView tv = (TextView) findViewById(R.id.tv);
-        tv.setText("Orientation X (Roll) :" + Float.toString(event.values[2]) + "\n" +
-                "Orientation Y (Pitch) :" + Float.toString(event.values[1]) + "\n" +
-                "Orientation Z (Yaw) :" + Float.toString(event.values[0]));
+       // TextView tv = (TextView) findViewById(R.id.tv);
+      //  tv.setText("Orientation X (Roll) :" + Float.toString(event.values[2]) + "\n" +
+      //          "Orientation Y (Pitch) :" + Float.toString(event.values[1]) + "\n" +
+      //          "Orientation Z (Yaw) :" + Float.toString(event.values[0]));
 
 
         //landscape config
@@ -511,6 +515,14 @@ public class ControlActivity extends Activity implements SensorEventListener, BT
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
 
+    }
+
+    @Override
+    public void received(MagnetoData magnetoData) {
+        TextView tv = (TextView) findViewById(R.id.tv);
+
+        Float magn=magnetoData.getHeadingFusionUnwrapped();
+        tv.setText(magn.toString());
     }
 
 

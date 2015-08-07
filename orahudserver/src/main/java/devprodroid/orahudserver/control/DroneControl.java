@@ -145,12 +145,12 @@ public class DroneControl implements Runnable {
     private boolean goUpDown() {
 
         if (isGoUpDemand()) {
-            cmd.up(20);
+            cmd.up(5);
 
             return true;
-        } else if (isGoUpDemand()) {
+        } else if (isGoDownDemand()) {
 
-            cmd.down(20);
+            cmd.down(5);
             return true;
         }
 
@@ -323,8 +323,8 @@ public class DroneControl implements Runnable {
 
     //Rotation and up down movement
     public void setRotateMode() {
-        this.rotateMode = false;
         this.rotateMode = true;
+        this.translateMode = false;
     }
 
     public boolean isTiltControlActive() {

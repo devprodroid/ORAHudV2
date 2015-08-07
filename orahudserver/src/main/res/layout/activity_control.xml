@@ -8,9 +8,9 @@
     tools:context="devprodroid.orahudserver.control.ControlActivity">
 
     <LinearLayout
-        android:orientation="vertical"
+        android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:id="@+id/linearLayout">
 
@@ -19,63 +19,78 @@
             android:layout_width="145dp"
             android:layout_height="wrap_content"
             android:text="Emergency"
-            android:layout_gravity="center_horizontal" />
-
-        <TableLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="10dip" >
-
-            <TableRow
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" >
-
-            </TableRow>
-
-            <TableRow
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" >
-
-            </TableRow>
-        </TableLayout>
+            android:layout_gravity="right" />
 
         <Button
             android:id="@+id/cmd_landing"
             android:layout_width="141dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dip"
-            android:text="Take Off"
-            android:layout_gravity="center_horizontal" />
-
-        <TableLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="10dip" >
-
-            <TableRow
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" >
-
-            </TableRow>
-
-            <TableRow
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" >
-
-            </TableRow>
-        </TableLayout>
+            android:text="Take Off" />
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="147dp"
             android:layout_height="wrap_content"
             android:text="New Text"
             android:id="@+id/tv"
             android:layout_alignParentTop="true"
             android:layout_alignParentStart="true"
-            android:layout_marginStart="48dp" />
+            android:layout_marginStart="48dp"
+            android:layout_gravity="center_horizontal" />
 
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/linearLayout">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="0.5" >
+
+            <Button
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="Go Up"
+                android:id="@+id/btn_up"
+                android:layout_weight="0.5" />
+
+            <Button
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="Go Down"
+                android:id="@+id/btn_down"
+                android:layout_gravity="bottom"
+                android:layout_weight="0.5" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_horizontal"
+            android:layout_weight="0.5">
+
+            <Button
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="Translate"
+                android:id="@+id/btn_tanslate"
+                android:layout_gravity="bottom"
+                android:layout_weight="0.5" />
+
+            <Button
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="Rotate"
+                android:id="@+id/btn_rotate"
+                android:layout_weight="0.5" />
+        </LinearLayout>
 
     </LinearLayout>
 

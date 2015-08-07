@@ -1,5 +1,6 @@
 package devprodroid.orahudserver.control;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -16,7 +17,9 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.MotionEvent;
 import android.view.View.OnClickListener;
+import android.view.View.OnTouchListener;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -42,9 +45,9 @@ import devprodroid.orahudserver.YADroneApplication;
 
 
 /**
- * This Activity displays Control interface and informations for the droneii
+ * This Activity displays Control interface and informations for the drone
  */
-public class ControlActivity extends AppCompatActivity implements SensorEventListener, BTSocketListener.Callback, AttitudeListener, AltitudeListener, BatteryListener, AcceleroListener {
+public class ControlActivity extends Activity implements SensorEventListener, BTSocketListener.Callback, AttitudeListener, AltitudeListener, BatteryListener, AcceleroListener {
 
 
     public final static String MSG_BT_UUID = "MSG_BT_UUID";
@@ -74,6 +77,7 @@ public class ControlActivity extends AppCompatActivity implements SensorEventLis
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_control);
+
 
         registerSensors();
 
@@ -148,11 +152,11 @@ public class ControlActivity extends AppCompatActivity implements SensorEventLis
                         showMsg("Connection successful!");
 
                     } catch (IOException e) {
-                       // showMsg(e.getMessage());
+                        // showMsg(e.getMessage());
                         Log.e(TAG, e.getMessage(), e);
                         showMsg("Connection not successful! Make sure Hud Client is running");
 
-                       // finish();
+                        // finish();
                     } finally {
                         mProgressDialog.dismiss();
                     }
@@ -187,6 +191,85 @@ public class ControlActivity extends AppCompatActivity implements SensorEventLis
      * TODO: Put methods in droneControl
      */
     private void initButtons() {
+
+
+        Button btn_tanslate = (Button) findViewById(R.id.btn_tanslate);
+        Button btn_rotate = (Button) findViewById(R.id.btn_rotate);
+
+        Button btn_goUp = (Button) findViewById(R.id.btn_up);
+        Button btn_goDown = (Button) findViewById(R.id.btn_down);
+
+
+        btn_tanslate.setOnTouchListener(new OnTouchListener() {
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    mDroneControl.setTranslateMode();
+                    mDroneControl.setControlActive(true);
+
+                }
+                else if (event.getAction() == MotionEvent.ACTION_UP){
+                    mDroneControl.setControlActive(false);
+                    mDroneControl.hover();
+                }
+
+                return true;
+            }
+        });
+
+        btn_rotate.setOnTouchListener(new OnTouchListener() {
+            public boolean onTouch(View v, MotionEvent event) {
+
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    mDroneControl.setRotateMode();
+
+                    mDroneControl.setControlActive(true);
+                }
+                else if (event.getAction() == MotionEvent.ACTION_UP){
+                    mDroneControl.setControlActive(false);
+                    mDroneControl.hover();
+                }
+
+                return true;
+            }
+        });
+
+        btn_goUp.setOnTouchListener(new OnTouchListener() {
+            public boolean onTouch(View v, MotionEvent event) {
+
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    mDroneControl.setGoUpDemand(true);
+
+
+                }
+                else if (event.getAction() == MotionEvent.ACTION_UP){
+                    mDroneControl.setGoUpDemand(false);
+
+                }
+
+                return true;
+            }
+        });
+
+        btn_goDown.setOnTouchListener(new OnTouchListener() {
+            public boolean onTouch(View v, MotionEvent event) {
+
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    mDroneControl.setGoDownDemand(true);
+
+                }
+                else if (event.getAction() == MotionEvent.ACTION_UP){
+                    mDroneControl.setGoDownDemand(false);
+
+                }
+
+                return true;
+            }
+        });
+
+//      btn_goUp
+//      btn_goDown
+
+
 //
 //        Button up = (Button) findViewById(R.id.cmd_up);
 //        up.setOnTouchListener(new OnTouchListener() {
@@ -241,50 +324,31 @@ public class ControlActivity extends AppCompatActivity implements SensorEventLis
 
         final Button landing = (Button) findViewById(R.id.cmd_landing);
         landing.setOnClickListener(new OnClickListener() {
+                                       public void onClick(View v) {
+                                           if (!mDroneControl.isFlying()) {
+                                               mDroneControl.takeoff();
+                                               landing.setText("Landing");
+                                           } else {
+                                               mDroneControl.land();
+                                               landing.setText("Take Off");
+                                           }
+                                       }
+                                   }
 
-
-            public void onClick(View v) {
-                if (!mDroneControl.isFlying()) {
-                    mDroneControl.takeoff();
-                    landing.setText("Landing");
-                } else {
-                    mDroneControl.land();
-                    landing.setText("Take Off");
-                }
-
-            }
-        });
+        );
 
         Button emergency = (Button) findViewById(R.id.cmd_emergency);
-        emergency.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                mDrone.reset();
-            }
-        });
+        emergency.setOnClickListener(new View.OnClickListener()
+
+                                     {
+                                         public void onClick(View v) {
+                                             mDrone.reset();
+                                         }
+                                     }
+
+        );
     }
 
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_control, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
 
     public void onResume() {
         super.onResume();
@@ -316,7 +380,7 @@ public class ControlActivity extends AppCompatActivity implements SensorEventLis
         removeDroneListeners();
 
         mSensorManager.unregisterListener(this);
-        finish();
+        //  finish();
 
 
     }
@@ -403,7 +467,7 @@ public class ControlActivity extends AppCompatActivity implements SensorEventLis
     @Override
     public void batteryLevelChanged(int batteryLevel) {
         mdataModel.setBatteryLevel(batteryLevel);
-        // Log.e(TAG, "Batterylevel: " +( (Integer) batteryLevel).toString());
+      //  Log.d(TAG, "AR.Drone Battery: " + batteryLevel);
     }
 
     @Override
@@ -464,6 +528,7 @@ public class ControlActivity extends AppCompatActivity implements SensorEventLis
                         msg.setPayload(mdataModel.getFlightDataByteArray());
 
                         mBTClient.sendMessage(msg);
+                        //Log.d(TAG, "Send Payload");
 
                     }
 

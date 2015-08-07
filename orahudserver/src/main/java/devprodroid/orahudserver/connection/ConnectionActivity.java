@@ -68,7 +68,7 @@ public class ConnectionActivity extends AppCompatActivity implements SwipeRefres
 
         initializeWifi();
 
-        //initializeDrone();
+        initializeDrone();
     }
 
     private void initializeWifi() {
@@ -103,6 +103,10 @@ public class ConnectionActivity extends AppCompatActivity implements SwipeRefres
         }
 
 
+        drone.getNavDataManager().addWifiListener(this);
+        drone.getNavDataManager().addBatteryListener(this);
+
+
     }
 
     @Override
@@ -134,22 +138,18 @@ public class ConnectionActivity extends AppCompatActivity implements SwipeRefres
 
         YADroneApplication app = (YADroneApplication) getApplication();
         IARDrone drone = app.getARDrone();
-        drone.getNavDataManager().addWifiListener(this);
-        drone.getNavDataManager().removeBatteryListener(this);
-        drone.stop();
+       drone.getNavDataManager().removeWifiListener(this);
+       drone.getNavDataManager().removeBatteryListener(this);
+       // drone.stop();
 
-        unregisterReceiver(handler);
-        finish();
+       //ccc
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
-        YADroneApplication app = (YADroneApplication) getApplication();
-        IARDrone drone = app.getARDrone();
-        drone.getNavDataManager().addWifiListener(this);
-        drone.getNavDataManager().addBatteryListener(this);
+
     }
 
 
@@ -249,6 +249,22 @@ public class ConnectionActivity extends AppCompatActivity implements SwipeRefres
         RefreshDeviceList();
     }
 
+@Override
+    public void onDestroy() {
+    super.onDestroy();
+    try {
+        unregisterReceiver(handler);
+    }
+    finally{}
+
+
+        YADroneApplication app = (YADroneApplication) getApplication();
+    IARDrone drone = app.getARDrone();
+    drone.getNavDataManager().removeWifiListener(this);
+    drone.getNavDataManager().removeBatteryListener(this);
+    drone.stop();
+    finish();
+}
     /**
      * Refresh the list of paired devices. Note that a device should be paired to be listed
      * in the listview on this GUI.
@@ -312,9 +328,12 @@ public class ConnectionActivity extends AppCompatActivity implements SwipeRefres
                 public void onClick(DialogInterface dialog, int whichButton) {
                     YADroneApplication app = (YADroneApplication) getApplication();
                     IARDrone drone = app.getARDrone();
+
                     drone.stop();
 
+                    unregisterReceiver(handler);
                     finish();
+
                 }
             }).setNeutralButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {

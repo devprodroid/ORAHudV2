@@ -34,7 +34,12 @@ public class DroneControl implements Runnable {
 
     private Thread myThread;
     private boolean translateMode;
-    private boolean rotateUpDownMode;
+    private boolean rotateMode;
+    private boolean controlActive;
+
+
+    private boolean goUpDemand;
+    private boolean goDownDemand;
 
 
     public DroneControl(IARDrone aDrone) {
@@ -75,31 +80,29 @@ public class DroneControl implements Runnable {
     @Override
     public void run() {
 
-    //if no action is performed, the drone shall hover
-    boolean performAction= false;
+        //if no action is performed, the drone shall hover
+        boolean performAction = false;
 
-
-// (cmd.isConnected())
         while ((running) && (cmd.isConnected())) {
 
             if (isFlying()) {
 
-                if (isTranslateMode()) {
+                if ((isTranslateMode()) && (isTiltControlActive())) {
                     //Pitch movement
                     performAction = pitchUpDown();
 
                     //Roll Movement
                     performAction = performAction || rollLeftRight();
-                }
-                else
-                if (isRotateUpDownMode()){
+                } else if ((isRotateMode())&& (isTiltControlActive())){
                     //Pitch movement
-                    performAction = goUpDown();
+                    performAction = pitchUpDown();
 
                     //Roll Movement
                     performAction = performAction || spinLeftRight();
                 }
 
+                //UpDown Movement
+                performAction = performAction ||goUpDown();
                 //We sleep for 20ms for performance reasons
 
 
@@ -108,14 +111,6 @@ public class DroneControl implements Runnable {
                 if (!performAction) {
                     hover();
                 }
-
-                //spin left
-                //spin right
-
-                //up
-                //down
-                sleep(sleepDuration);
-
 
                 //if the Controller is not connected, the Drone needs to land, so that nothing
                 //unexpected happens
@@ -126,6 +121,7 @@ public class DroneControl implements Runnable {
                     sleep(200);
                 }
             }
+            sleep(sleepDuration);
         }
     }
 
@@ -148,21 +144,33 @@ public class DroneControl implements Runnable {
 
     private boolean goUpDown() {
 
-        if (getPitch_angleNormed() > 20) {
-            //back
-            cmd.up(getPitch_angleControl());
-            Log.e("Command", "up: " + getPitch_angleControl());
+        if (isGoUpDemand()) {
+            cmd.up(20);
+
             return true;
-        } else if (getPitch_angleNormed() < -20) {
-            //forward
-            cmd.down(getPitch_angleControl());
-            Log.e("Command", "down: " + getPitch_angleControl());
+        } else if (isGoUpDemand()) {
+
+            cmd.down(20);
             return true;
         }
+
+
+//        if (getPitch_angleNormed() > 20) {
+//            //back
+//            cmd.up(getPitch_angleControl());
+//            Log.e("Command", "up: " + getPitch_angleControl());
+//            return true;
+//        } else if (getPitch_angleNormed() < -20) {
+//            //forward
+//            cmd.down(getPitch_angleControl());
+//            Log.e("Command", "down: " + getPitch_angleControl());
+//            return true;
+//        }
         return false;
     }
 
-    private boolean rollLeftRight(){
+
+    private boolean rollLeftRight() {
 
         if (getRoll_angleNormed() > 20) {
             //right
@@ -179,7 +187,7 @@ public class DroneControl implements Runnable {
         return false;
     }
 
-    private boolean spinLeftRight(){
+    private boolean spinLeftRight() {
 
         if (getRoll_angleNormed() > 20) {
             //right
@@ -294,22 +302,54 @@ public class DroneControl implements Runnable {
      */
     public void hover() {
         drone.hover();
-        Log.e(TAG, "Hover: ");
+
     }
 
+    //translate
     public boolean isTranslateMode() {
-        return translateMode;
+        return true;
     }
 
-    public void setTranslateMode(boolean translateMode) {
-        this.translateMode = translateMode;
+    public void setTranslateMode() {
+        this.translateMode = true;
+        this.rotateMode = false;
+
     }
 
-    public boolean isRotateUpDownMode() {
-        return rotateUpDownMode;
+    public boolean isRotateMode() {
+        return rotateMode;
     }
 
-    public void setRotateUpDownMode(boolean rotateUpDownMode) {
-        this.rotateUpDownMode = rotateUpDownMode;
+
+    //Rotation and up down movement
+    public void setRotateMode() {
+        this.rotateMode = false;
+        this.rotateMode = true;
+    }
+
+    public boolean isTiltControlActive() {
+        return this.controlActive;
+    }
+
+    //Rotation and up down movement
+    public void setControlActive(boolean active) {
+        this.controlActive = active;
+    }
+
+
+    public boolean isGoUpDemand() {
+        return goUpDemand;
+    }
+
+    public void setGoUpDemand(boolean goUpDemand) {
+        this.goUpDemand = goUpDemand;
+    }
+
+    public boolean isGoDownDemand() {
+        return goDownDemand;
+    }
+
+    public void setGoDownDemand(boolean goDownDemand) {
+        this.goDownDemand = goDownDemand;
     }
 }

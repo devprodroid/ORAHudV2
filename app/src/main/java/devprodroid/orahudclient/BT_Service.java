@@ -75,21 +75,10 @@ public class BT_Service extends BTServerService {
     public BTMessage handle(BTMessage msg) {
         //byte eventType = msg.getMsgType();
         byte[] payload = msg.getPayload();
-       // switch (eventType) {
 
-           // case 4: //notify activity ! wohooo
-                //intent.putExtra("time", new Date().toLocaleString());
-               // intent.putExtra("counter", String.valueOf(++counter));
                 intent.putExtra("payload", payload);
-
-                //intent.putExtra("eventType", eventType);
-
                 sendBroadcast(intent);
 
-             //   break;
-           // default:
-              //  throw new IllegalStateException();
-      //  }
 
         return null;
     }

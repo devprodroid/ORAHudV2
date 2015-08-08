@@ -3,10 +3,6 @@ package devprodroid.bluetooth;
 /**
  * Created by robert on 04.06.15.
  */
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by Fernflower decompiler)
-//
 
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;

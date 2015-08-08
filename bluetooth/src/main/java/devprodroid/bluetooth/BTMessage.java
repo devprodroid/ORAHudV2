@@ -23,6 +23,7 @@ public class BTMessage {
         int bytes;
         bytes = input.read(buffer);
         this.payload = buffer;
+       // Log.d("BytesRead", Integer.toString(bytes));
 
     }
 

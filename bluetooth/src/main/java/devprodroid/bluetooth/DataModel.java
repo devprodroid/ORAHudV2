@@ -1,7 +1,5 @@
 package devprodroid.bluetooth;
 
-import android.util.Log;
-
 /**
  * Created by robert on 15.06.15.
  */
@@ -59,7 +57,8 @@ public class DataModel {
                 dst[i] = x;
             }
 
-            if (dst[0]==0) {Log.d("byte2int", Byte.toString(src[0]));}
+          // if (dst[0]==0) {
+           //    Log.d("byte2int", Byte.toString(src[0]));}
 
             return dst;
     }
@@ -72,12 +71,12 @@ public class DataModel {
         for (int i = 0; i < srcLength; i++) {
             int x = src[i];
             int j = i << 2;
-            dst[j++] = (byte) ((x >>> 0) & 0xff);
-            dst[j++] = (byte) ((x >>> 8) & 0xff);
-            dst[j++] = (byte) ((x >>> 16) & 0xff);
-            dst[j++] = (byte) ((x >>> 24) & 0xff);
+            dst[j++] = (byte) ((x >> 0) & 0xff);
+            dst[j++] = (byte) ((x >> 8) & 0xff);
+            dst[j++] = (byte) ((x >> 16) & 0xff);
+            dst[j++] = (byte) ((x >> 24) & 0xff);
         }
-           if (dst[0]==0) {Log.d("int2byte", Integer.toString(src[0]));}
+        //   if (dst[0]==0) {Log.d("int2byte", Integer.toString(src[0]));}
         return dst;
     }
 

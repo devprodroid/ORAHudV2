@@ -177,7 +177,7 @@ public class ControlActivity extends Activity implements SensorEventListener, BT
         if (mSensor != null) {
             // Success! There's an accelerometer
             mSensorManager.registerListener(this, mSensor,
-                    SensorManager.SENSOR_DELAY_FASTEST);
+                    SensorManager.SENSOR_DELAY_GAME);
         } else {
             Toast.makeText(this, "This device doesnt support STRING_TYPE_ACCELEROMETER",
                     Toast.LENGTH_SHORT).show();
@@ -354,7 +354,7 @@ public class ControlActivity extends Activity implements SensorEventListener, BT
 
         addDroneListeners();
 
-        mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_FASTEST);
+        mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_GAME);
 
         mDroneControl.startThread();
 
@@ -509,6 +509,18 @@ public class ControlActivity extends Activity implements SensorEventListener, BT
 
         mDroneControl.setPitch_angle(event.values[0]);
         mDroneControl.setRoll_angle(event.values[1]);
+
+
+
+            mdataModel.setPitch(Math.round(event.values[0]* 10));
+            mdataModel.setRoll(Math.round(event.values[1]*10));
+
+
+            new SendtoBT().execute();
+
+
+
+
 
     }
 

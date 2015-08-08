@@ -32,9 +32,13 @@ public class GLRenderer implements GLSurfaceView.Renderer {
     private float mPitch;
     private Integer mBatteryLevel;
     private DataModel mDataModel;
+    private long lastFrameTime= 0;
+
+    private FPSCounter fps;
 
     public GLRenderer(Context context, DataModel dataModel) {
         mDataModel=dataModel;
+        fps =new FPSCounter();
 
     }
 
@@ -58,12 +62,22 @@ public class GLRenderer implements GLSurfaceView.Renderer {
         float[] transMatrix = new float[16];
         float[] batteryScaleMatrix = new float[16];
 
+        //fps.logFrame();
+
+
+
         //Get Values from DataModel
 
        // getModelValues();
-        mAngle= mDataModel.getRoll().floatValue();
-        mPitch =(float)Math.sin(mDataModel.getPitch().doubleValue()* Math.PI / 180.0);
-        mBatteryLevel =mDataModel.getBatteryLevel();
+        float mAngleNew =mDataModel.getRoll().floatValue();
+        float mPitchNew = (float) Math.sin(mDataModel.getPitch().doubleValue() * Math.PI / 180.0);
+        int mBatteryLevelNew = mDataModel.getBatteryLevel();
+
+        //interpolation
+
+        mAngle=mAngle-((mAngle-mAngleNew)/5);
+        mPitch =mPitch-((mPitch-mPitchNew)/5);
+        mBatteryLevel =mBatteryLevelNew;
 
 
         // Draw background color
@@ -176,4 +190,18 @@ public class GLRenderer implements GLSurfaceView.Renderer {
         mAngle = angle;
     }
 
+}
+
+ class FPSCounter {
+    long startTime = System.nanoTime();
+    int frames = 0;
+
+    public void logFrame() {
+        frames++;
+        if(System.nanoTime() - startTime >= 1000000000) {
+            Log.d("FPSCounter", "fps: " + frames);
+            frames = 0;
+            startTime = System.nanoTime();
+        }
+    }
 }

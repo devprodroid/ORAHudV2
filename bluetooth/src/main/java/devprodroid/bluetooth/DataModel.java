@@ -40,29 +40,32 @@ public class DataModel {
         linkValuesToArrayIndices();
 
     }
-
+    /**
+     * Generates an Integer array from a byte array array
+     * @param src The Byte Array
+     * @return
+     */
     public static int[] byte2int(byte[] src) {
         int dstLength = src.length >>> 2;
         int[] dst = new int[dstLength];
 
-
-           // Log.d("ByteDebug", Byte.toString(src[0]));
             for (int i = 0; i < dstLength; i++) {
                 int j = i << 2;
                 int x = 0;
                 x += (src[j++] & 0xff) << 0;
-                x += (src[j++] & 0xff) << 8;
+                x += (src[j++] & 0xff) << 8;//three weeks lifetime wasted
                 x += (src[j++] & 0xff) << 16;
                 x += (src[j++] & 0xff) << 24;
                 dst[i] = x;
             }
-
-          // if (dst[0]==0) {
-           //    Log.d("byte2int", Byte.toString(src[0]));}
-
             return dst;
     }
 
+    /**
+     * Generates a byte array from an integer array
+     * @param src The Integer Array
+     * @return
+     */
     private static byte[] int2byte(int[] src) {
 
         int srcLength = src.length;

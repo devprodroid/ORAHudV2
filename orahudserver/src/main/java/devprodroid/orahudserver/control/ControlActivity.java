@@ -243,6 +243,7 @@ public class ControlActivity extends Activity implements SensorEventListener, BT
                 else if (event.getAction() == MotionEvent.ACTION_UP){
                     mDroneControl.setGoUpDemand(false);
 
+
                 }
 
                 return true;
@@ -407,6 +408,10 @@ public class ControlActivity extends Activity implements SensorEventListener, BT
         mdataModel.setRoll(Math.round(roll / 1000));
         mdataModel.setYaw(Math.round(yaw / 1000));
         new SendtoBT().execute();
+      //  TextView tv = (TextView) findViewById(R.id.tv);
+
+        //Log.d("Pitch", mdataModel.getPitch().toString());
+      //  tv.setText(mdataModel.getPitch().toString());
     }
 
     public void attitudeUpdated(float arg0, float arg1) {
@@ -494,32 +499,17 @@ public class ControlActivity extends Activity implements SensorEventListener, BT
     @Override
     public void onSensorChanged(SensorEvent event) {
 
-        //   float azimuth_angle = event.values[0];
-        // float pitch_angle = event.values[1];-3 +3
-        //  float roll_angle = event.values[2];
-
-
-       // TextView tv = (TextView) findViewById(R.id.tv);
-      //  tv.setText("Orientation X (Roll) :" + Float.toString(event.values[2]) + "\n" +
-      //          "Orientation Y (Pitch) :" + Float.toString(event.values[1]) + "\n" +
-      //          "Orientation Z (Yaw) :" + Float.toString(event.values[0]));
-
-
         //landscape config
 
         mDroneControl.setPitch_angle(event.values[0]);
         mDroneControl.setRoll_angle(event.values[1]);
 
-
-
+        //simulation
             mdataModel.setPitch(Math.round(event.values[0]* 10));
-            mdataModel.setRoll(Math.round(event.values[1]*10));
-
-
+            mdataModel.setRoll(Math.round(event.values[1] * 10));
+            mdataModel.setAltitude(Math.round(event.values[1] * 10));
+           mdataModel.setBatteryLevel(Math.round(event.values[1] * 10));
             new SendtoBT().execute();
-
-
-
 
 
     }
@@ -531,15 +521,15 @@ public class ControlActivity extends Activity implements SensorEventListener, BT
 
     @Override
     public void received(MagnetoData magnetoData) {
-        TextView tv = (TextView) findViewById(R.id.tv);
-
-        Float magn=magnetoData.getHeadingFusionUnwrapped();
-        tv.setText(magn.toString());
+     //   TextView tv = (TextView) findViewById(R.id.tv);
+        Log.d("Magnetodata", magnetoData.toString());
+        Integer magn=magnetoData.getState();
+      //  tv.setText(magn.toString());
     }
 
 
     private class SendtoBT extends AsyncTask<Float, Void, Boolean> {
-
+        BTMessage msg = new BTMessage();
         @Override
         protected Boolean doInBackground(Float... params) {
 
@@ -547,12 +537,13 @@ public class ControlActivity extends Activity implements SensorEventListener, BT
                 try {
                     btSending = true;
                     if (connected) {
-                        BTMessage msg = new BTMessage();
+
 
                         msg.setPayload(mdataModel.getFlightDataByteArray());
 
                         mBTClient.sendMessage(msg);
                         //Log.d(TAG, "Send Payload");
+
 
                     }
 

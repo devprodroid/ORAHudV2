@@ -83,6 +83,11 @@ public class DroneControl implements Runnable {
         //if no action is performed, the drone shall hover
         boolean performAction = false;
 
+        if (isRotateMode())
+        Log.d("ControlMode", "Rotate");
+        if (isTranslateMode())
+        Log.d("ControlMode", "Translate");
+
         while ((running) && (cmd.isConnected())) {
 
             if (isFlying()) {
@@ -92,17 +97,17 @@ public class DroneControl implements Runnable {
                     performAction = pitchUpDown();
 
                     //Roll Movement
-                    performAction = performAction || rollLeftRight();
+                    performAction =  rollLeftRight()||performAction;
                 } else if ((isRotateMode())&& (isTiltControlActive())){
                     //Pitch movement
                     performAction = pitchUpDown();
 
                     //Roll Movement
-                    performAction = performAction || spinLeftRight();
+                    performAction =  spinLeftRight()|| performAction;
                 }
 
                 //UpDown Movement
-                performAction = performAction ||goUpDown();
+                performAction = goUpDown()|| performAction;
                 //We sleep for 20ms for performance reasons
 
 
@@ -146,7 +151,6 @@ public class DroneControl implements Runnable {
 
         if (isGoUpDemand()) {
             cmd.up(5);
-
             return true;
         } else if (isGoDownDemand()) {
 
@@ -191,12 +195,12 @@ public class DroneControl implements Runnable {
 
         if (getRoll_angleNormed() > 20) {
             //right
-            cmd.spinRight(getRoll_angleControl());
+            cmd.spinRight(getRoll_angleControl()*5);
             Log.e("Command", "spin right: " + getRoll_angleControl());
             return true;
         } else if (getRoll_angleNormed() < -20) {
             //left
-            cmd.spinLeft(getRoll_angleControl());
+            cmd.spinLeft(getRoll_angleControl()*5);
             Log.e("Command", "spin left: " + getRoll_angleControl());
             return true;
 
@@ -307,7 +311,7 @@ public class DroneControl implements Runnable {
 
     //translate
     public boolean isTranslateMode() {
-        return true;
+        return this.translateMode;
     }
 
     public void setTranslateMode() {

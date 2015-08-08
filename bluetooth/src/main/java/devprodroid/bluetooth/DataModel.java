@@ -1,5 +1,7 @@
 package devprodroid.bluetooth;
 
+import android.util.Log;
+
 /**
  * Created by robert on 15.06.15.
  */
@@ -33,6 +35,8 @@ public class DataModel {
     private Integer accZ=0;
 
 
+
+
     public DataModel() {
         FlightData = new int[64];
         linkValuesToArrayIndices();
@@ -43,19 +47,25 @@ public class DataModel {
         int dstLength = src.length >>> 2;
         int[] dst = new int[dstLength];
 
-        for (int i = 0; i < dstLength; i++) {
-            int j = i << 2;
-            int x = 0;
-            x += (src[j++] & 0xff) << 0;
-            x += (src[j++] & 0xff) << 8;
-            x += (src[j++] & 0xff) << 16;
-            x += (src[j++] & 0xff) << 24;
-            dst[i] = x;
-        }
-        return dst;
+
+           // Log.d("ByteDebug", Byte.toString(src[0]));
+            for (int i = 0; i < dstLength; i++) {
+                int j = i << 2;
+                int x = 0;
+                x += (src[j++] & 0xff) << 0;
+                x += (src[j++] & 0xff) << 8;
+                x += (src[j++] & 0xff) << 16;
+                x += (src[j++] & 0xff) << 24;
+                dst[i] = x;
+            }
+
+            if (dst[0]==0) {Log.d("byte2int", Byte.toString(src[0]));}
+
+            return dst;
     }
 
     private static byte[] int2byte(int[] src) {
+
         int srcLength = src.length;
         byte[] dst = new byte[srcLength << 2];
 
@@ -67,6 +77,7 @@ public class DataModel {
             dst[j++] = (byte) ((x >>> 16) & 0xff);
             dst[j++] = (byte) ((x >>> 24) & 0xff);
         }
+           if (dst[0]==0) {Log.d("int2byte", Integer.toString(src[0]));}
         return dst;
     }
 
@@ -97,8 +108,8 @@ public class DataModel {
 
         FlightData[6] = batteryLevel;
         FlightData[7] = accZ;
-
     }
+
 
     public void updateFields() {
 
@@ -202,4 +213,14 @@ public class DataModel {
         this.accZ = accZ;
         linkValuesToArrayIndices();
     }
+
+    @Override
+    public String toString() {
+        return new StringBuilder()
+                .append("{Pitch:").append(pitch)
+                .append(" Roll=").append(roll)
+                .append(", Yaw=").append(yaw)
+                .append("}").toString();
+    }
+
 }

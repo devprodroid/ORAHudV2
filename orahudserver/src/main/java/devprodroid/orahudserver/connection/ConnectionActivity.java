@@ -68,7 +68,7 @@ public class ConnectionActivity extends AppCompatActivity implements SwipeRefres
 
         initializeWifi();
 
-        initializeDrone();
+    //    initializeDrone();
     }
 
     private void initializeWifi() {
@@ -94,6 +94,7 @@ public class ConnectionActivity extends AppCompatActivity implements SwipeRefres
         try {
             Log.e(TAG, "Initialize the drone ..");
             drone.start();
+            drone.getCommandManager().setNavDataDemo(false);
 
 
         } catch (Exception exc) {
@@ -225,7 +226,7 @@ public class ConnectionActivity extends AppCompatActivity implements SwipeRefres
 
 
                                 //Start the main activity
-
+                             //   initializeDrone();
                                 intent.putExtra(ControlActivity.MSG_BT_UUID, ConnectionActivity.serv_UUID.toString());
                                 intent.putExtra(ControlActivity.MSG_MAC_BT_DEVICE_ADDRESS, btDevice.getAddress());
 
@@ -247,6 +248,7 @@ public class ConnectionActivity extends AppCompatActivity implements SwipeRefres
 
         //Refresh the listview of MAC addresses and names.
         RefreshDeviceList();
+        initializeDrone();
     }
 
 @Override
@@ -317,6 +319,7 @@ public class ConnectionActivity extends AppCompatActivity implements SwipeRefres
 
         if (v.getId() == R.id.btnDrone) {
             initializeDrone();
+
         }
     }
 

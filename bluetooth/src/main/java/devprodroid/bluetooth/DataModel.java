@@ -30,13 +30,15 @@ public class DataModel {
     //from BatteryListener
     private Integer batteryLevel=0;
     private Integer voltage=0;
+
+
     private Integer accZ=0;
 
 
 
 
     public DataModel() {
-        FlightData = new int[64];
+        FlightData = new int[32];
         linkValuesToArrayIndices();
 
     }
@@ -115,18 +117,20 @@ public class DataModel {
 
     public void updateFields() {
 
-        pitch = FlightData[0];
-        roll = FlightData[1];
-        yaw = FlightData[2];
+        if(FlightData[6]>0) {//validate battery level for simple detection of connection errors
 
-        pitchCompensation = FlightData[3];
-        rollCompensation = FlightData[4];
+            pitch = FlightData[0];
+            roll = FlightData[1];
+            yaw = FlightData[2];
 
-        altitude = FlightData[5];
+            pitchCompensation = FlightData[3];
+            rollCompensation = FlightData[4];
 
-        batteryLevel = FlightData[6];
-        accZ =FlightData[7];
+            altitude = FlightData[5];
 
+            batteryLevel = FlightData[6];
+            accZ = FlightData[7];
+        }
     }
 
 

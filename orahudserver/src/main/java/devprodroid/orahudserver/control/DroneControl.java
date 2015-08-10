@@ -89,7 +89,7 @@ public class DroneControl implements Runnable {
         Log.d("ControlMode", "Translate");
 
         while ((running) && (cmd.isConnected())) {
-
+            performAction = false;
             if (isFlying()) {
 
                 if ((isTranslateMode()) && (isTiltControlActive())) {
@@ -122,6 +122,7 @@ public class DroneControl implements Runnable {
             } else {
                 if (isFlying()) {
                     cmd.landing();
+                    Log.d("Drone", "Landing");
                     setIsFlying(false);
                     sleep(200);
                 }
@@ -150,11 +151,11 @@ public class DroneControl implements Runnable {
     private boolean goUpDown() {
 
         if (isGoUpDemand()) {
-            cmd.up(5);
+            cmd.up(20);
             return true;
         } else if (isGoDownDemand()) {
 
-            cmd.down(5);
+            cmd.down(20);
             return true;
         }
 

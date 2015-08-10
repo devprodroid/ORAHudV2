@@ -75,8 +75,8 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
         //interpolation
 
-        mAngle=mAngle-((mAngle-mAngleNew)/5);
-        mPitch =mPitch-((mPitch-mPitchNew)/5);
+        mAngle=mAngle-((mAngle-mAngleNew)/3);
+        mPitch =mPitch-((mPitch-mPitchNew)/3);
         mBatteryLevel =mBatteryLevelNew;
 
 

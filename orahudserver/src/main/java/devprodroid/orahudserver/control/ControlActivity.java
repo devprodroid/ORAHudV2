@@ -82,6 +82,8 @@ public class ControlActivity extends Activity implements SensorEventListener, BT
 
         initDrone();
 
+
+
         initButtons();
 
         initDataModel();
@@ -99,6 +101,9 @@ public class ControlActivity extends Activity implements SensorEventListener, BT
 
         mDrone = mApp.getARDrone();
         mDroneControl = new DroneControl(mDrone);
+
+        addDroneListeners();
+
     }
 
     /**
@@ -353,7 +358,8 @@ public class ControlActivity extends Activity implements SensorEventListener, BT
     public void onResume() {
         super.onResume();
 
-        addDroneListeners();
+        initDrone();
+       // addDroneListeners();
 
         mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_GAME);
 
@@ -465,12 +471,17 @@ public class ControlActivity extends Activity implements SensorEventListener, BT
 
     @Override
     public void receivedAltitude(int altitude) {
-        mdataModel.setAltitude(0);
+
     }
 
     @Override
     public void receivedExtendedAltitude(Altitude altitude) {
+        mdataModel.setAccZ(Math.round(altitude.getZVelocity())); //>10 down , <10 up
 
+        mdataModel.setAltitude(altitude.getRaw());
+
+
+        Log.d("Altitude", "recieved "+altitude.toString());
     }
 
     @Override
@@ -492,7 +503,7 @@ public class ControlActivity extends Activity implements SensorEventListener, BT
     @Override
     public void receivedPhysData(AcceleroPhysData acceleroPhysData) {
         float tmp = acceleroPhysData.getPhysAccs()[2];
-        mdataModel.setAccZ(Math.round(tmp));
+       // mdataModel.setAccZ(Math.round(tmp));
 
     }
 
@@ -505,11 +516,11 @@ public class ControlActivity extends Activity implements SensorEventListener, BT
         mDroneControl.setRoll_angle(event.values[1]);
 
         //simulation
-            mdataModel.setPitch(Math.round(event.values[0]* 10));
-            mdataModel.setRoll(Math.round(event.values[1] * 10));
-            mdataModel.setAltitude(Math.round(event.values[1] * 10));
-           mdataModel.setBatteryLevel(Math.round(event.values[1] * 10));
-            new SendtoBT().execute();
+      //      mdataModel.setPitch(Math.round(event.values[0]* 10));
+        //    mdataModel.setRoll(Math.round(event.values[1] * 10));
+        //    mdataModel.setAltitude(Math.round(event.values[1] * 10));
+        //   mdataModel.setBatteryLevel(Math.round(event.values[1] * 10));
+        //    new SendtoBT().execute();
 
 
     }
@@ -522,8 +533,8 @@ public class ControlActivity extends Activity implements SensorEventListener, BT
     @Override
     public void received(MagnetoData magnetoData) {
      //   TextView tv = (TextView) findViewById(R.id.tv);
-        Log.d("Magnetodata", magnetoData.toString());
-        Integer magn=magnetoData.getState();
+       // Log.d("Magnetodata", magnetoData.toString());
+        //Integer magn=magnetoData.getState();
       //  tv.setText(magn.toString());
     }
 

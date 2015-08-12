@@ -60,7 +60,7 @@ public class ControlActivity extends Activity implements SensorEventListener, BT
     private Boolean btSending = false;
     private ProgressDialog mProgressDialog;
     private TextView tvText;
-    private DataModel mdataModel;
+    private DataModel mDataModel;
     private DroneControl mDroneControl;
     private YADroneApplication mApp;
     private IARDrone mDrone;
@@ -110,7 +110,7 @@ public class ControlActivity extends Activity implements SensorEventListener, BT
      * Create DataModel Instance
      */
     private void initDataModel() {
-        mdataModel = new DataModel();
+        mDataModel = new DataModel();
     }
 
     /**
@@ -410,22 +410,22 @@ public class ControlActivity extends Activity implements SensorEventListener, BT
 
     public void attitudeUpdated(final float pitch, final float roll, final float yaw) {
 
-        mdataModel.setPitch(Math.round(pitch / 1000));
-        mdataModel.setRoll(Math.round(roll / 1000));
-        mdataModel.setYaw(Math.round(yaw / 1000));
+        mDataModel.setPitch(Math.round(pitch / 1000));
+        mDataModel.setRoll(Math.round(roll / 1000));
+        mDataModel.setYaw(Math.round(yaw / 1000));
         new SendtoBT().execute();
       //  TextView tv = (TextView) findViewById(R.id.tv);
 
-        //Log.d("Pitch", mdataModel.getPitch().toString());
-      //  tv.setText(mdataModel.getPitch().toString());
+        //Log.d("Pitch", mDataModel.getPitch().toString());
+      //  tv.setText(mDataModel.getPitch().toString());
     }
 
     public void attitudeUpdated(float arg0, float arg1) {
     }
 
     public void windCompensation(float pitch, float roll) {
-        mdataModel.setPitchCompensation(Math.round(pitch / 1000));
-        mdataModel.setRollCompensation(Math.round(roll / 1000));
+        mDataModel.setPitchCompensation(Math.round(pitch / 1000));
+        mDataModel.setRollCompensation(Math.round(roll / 1000));
     }
 
 
@@ -476,9 +476,19 @@ public class ControlActivity extends Activity implements SensorEventListener, BT
 
     @Override
     public void receivedExtendedAltitude(Altitude altitude) {
-        mdataModel.setAccZ(Math.round(altitude.getZVelocity())); //>10 down , <10 up
+        int zVel;
 
-        mdataModel.setAltitude(altitude.getRaw());
+        zVel = Math.round(altitude.getZVelocity());; //>10 down , <10 up
+
+        //normed zvel value
+        if (zVel >= 20) {
+            mDataModel.setAccZ(-1);
+        }
+        else if (zVel <= -20) {
+            mDataModel.setAccZ(1);
+        }
+
+        mDataModel.setAltitude(altitude.getRaw());
 
 
         Log.d("Altitude", "recieved "+altitude.toString());
@@ -486,13 +496,13 @@ public class ControlActivity extends Activity implements SensorEventListener, BT
 
     @Override
     public void batteryLevelChanged(int batteryLevel) {
-        mdataModel.setBatteryLevel(batteryLevel);
+        mDataModel.setBatteryLevel(batteryLevel);
       //  Log.d(TAG, "AR.Drone Battery: " + batteryLevel);
     }
 
     @Override
     public void voltageChanged(int voltage) {
-        //mdataModel.setVoltage(voltage);
+        //mDataModel.setVoltage(voltage);
     }
 
     @Override
@@ -503,7 +513,7 @@ public class ControlActivity extends Activity implements SensorEventListener, BT
     @Override
     public void receivedPhysData(AcceleroPhysData acceleroPhysData) {
         float tmp = acceleroPhysData.getPhysAccs()[2];
-       // mdataModel.setAccZ(Math.round(tmp));
+       // mDataModel.setAccZ(Math.round(tmp));
 
     }
 
@@ -516,10 +526,10 @@ public class ControlActivity extends Activity implements SensorEventListener, BT
         mDroneControl.setRoll_angle(event.values[1]);
 
         //simulation
-      //      mdataModel.setPitch(Math.round(event.values[0]* 10));
-        //    mdataModel.setRoll(Math.round(event.values[1] * 10));
-        //    mdataModel.setAltitude(Math.round(event.values[1] * 10));
-        //   mdataModel.setBatteryLevel(Math.round(event.values[1] * 10));
+      //      mDataModel.setPitch(Math.round(event.values[0]* 10));
+        //    mDataModel.setRoll(Math.round(event.values[1] * 10));
+        //    mDataModel.setAltitude(Math.round(event.values[1] * 10));
+        //   mDataModel.setBatteryLevel(Math.round(event.values[1] * 10));
         //    new SendtoBT().execute();
 
 
@@ -550,7 +560,7 @@ public class ControlActivity extends Activity implements SensorEventListener, BT
                     if (connected) {
 
 
-                        msg.setPayload(mdataModel.getFlightDataByteArray());
+                        msg.setPayload(mDataModel.getFlightDataByteArray());
 
                         mBTClient.sendMessage(msg);
                         //Log.d(TAG, "Send Payload");

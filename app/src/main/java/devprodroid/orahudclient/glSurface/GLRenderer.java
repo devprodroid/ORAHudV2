@@ -88,10 +88,10 @@ public class GLRenderer implements GLSurfaceView.Renderer {
         UpActive = false;
         DownActive = false;
         //>10 down , <10 up
-        if (mDataModel.getAccZ() >= 1) {
+        if (mDataModel.getAccZ() >= 20) {
             UpActive = false;
             DownActive = true;
-        } else if (mDataModel.getAccZ() <= -1) {
+        } else if (mDataModel.getAccZ() <= -20) {
             UpActive = true;
             DownActive = false;
         }

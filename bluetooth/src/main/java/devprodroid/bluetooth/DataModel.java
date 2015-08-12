@@ -38,7 +38,7 @@ public class DataModel {
 
 
     public DataModel() {
-        FlightData = new int[32];
+        FlightData = new int[64];
         linkValuesToArrayIndices();
 
     }

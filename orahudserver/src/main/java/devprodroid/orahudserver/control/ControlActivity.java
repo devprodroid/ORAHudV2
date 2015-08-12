@@ -66,7 +66,7 @@ public class ControlActivity extends Activity implements SensorEventListener, BT
     private IARDrone mDrone;
     private SensorManager mSensorManager;
     private Sensor mSensor;
-
+    private static TextView tv;
 
     public static byte[] float2ByteArray(float value) {
         return ByteBuffer.allocate(4).putFloat(value).array();
@@ -77,12 +77,9 @@ public class ControlActivity extends Activity implements SensorEventListener, BT
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_control);
 
+        tv = (TextView) findViewById(R.id.tv);
 
         registerSensors();
-
-        initDrone();
-
-
 
         initButtons();
 
@@ -414,10 +411,7 @@ public class ControlActivity extends Activity implements SensorEventListener, BT
         mDataModel.setRoll(Math.round(roll / 1000));
         mDataModel.setYaw(Math.round(yaw / 1000));
         new SendtoBT().execute();
-      //  TextView tv = (TextView) findViewById(R.id.tv);
 
-        //Log.d("Pitch", mDataModel.getPitch().toString());
-      //  tv.setText(mDataModel.getPitch().toString());
     }
 
     public void attitudeUpdated(float arg0, float arg1) {
@@ -480,18 +474,12 @@ public class ControlActivity extends Activity implements SensorEventListener, BT
 
         zVel = Math.round(altitude.getZVelocity());; //>10 down , <10 up
 
-        //normed zvel value
-        if (zVel >= 20) {
-            mDataModel.setAccZ(-1);
-        }
-        else if (zVel <= -20) {
-            mDataModel.setAccZ(1);
-        }
+            mDataModel.setAccZ(zVel);
+
 
         mDataModel.setAltitude(altitude.getRaw());
 
-
-        Log.d("Altitude", "recieved "+altitude.toString());
+        //Log.d("Zvelocity", "recieved "+zVel);
     }
 
     @Override
@@ -502,7 +490,7 @@ public class ControlActivity extends Activity implements SensorEventListener, BT
 
     @Override
     public void voltageChanged(int voltage) {
-        //mDataModel.setVoltage(voltage);
+       // //mDataModel.setVoltage(voltage);
     }
 
     @Override
@@ -512,8 +500,6 @@ public class ControlActivity extends Activity implements SensorEventListener, BT
 
     @Override
     public void receivedPhysData(AcceleroPhysData acceleroPhysData) {
-        float tmp = acceleroPhysData.getPhysAccs()[2];
-       // mDataModel.setAccZ(Math.round(tmp));
 
     }
 
@@ -525,14 +511,6 @@ public class ControlActivity extends Activity implements SensorEventListener, BT
         mDroneControl.setPitch_angle(event.values[0]);
         mDroneControl.setRoll_angle(event.values[1]);
 
-        //simulation
-      //      mDataModel.setPitch(Math.round(event.values[0]* 10));
-        //    mDataModel.setRoll(Math.round(event.values[1] * 10));
-        //    mDataModel.setAltitude(Math.round(event.values[1] * 10));
-        //   mDataModel.setBatteryLevel(Math.round(event.values[1] * 10));
-        //    new SendtoBT().execute();
-
-
     }
 
     @Override
@@ -542,10 +520,8 @@ public class ControlActivity extends Activity implements SensorEventListener, BT
 
     @Override
     public void received(MagnetoData magnetoData) {
-     //   TextView tv = (TextView) findViewById(R.id.tv);
-       // Log.d("Magnetodata", magnetoData.toString());
-        //Integer magn=magnetoData.getState();
-      //  tv.setText(magn.toString());
+
+
     }
 
 
@@ -563,15 +539,15 @@ public class ControlActivity extends Activity implements SensorEventListener, BT
                         msg.setPayload(mDataModel.getFlightDataByteArray());
 
                         mBTClient.sendMessage(msg);
-                        //Log.d(TAG, "Send Payload");
+                        //Log.d(TAG, "Send Payload"+ mDataModel.getRoll());
 
 
                     }
 
 
                 } catch (IOException E) {
-                    Log.e(TAG, E.getMessage(), E);
-
+                   // Log.e(TAG, E.getMessage(), E);
+                    //btSending = false;
                 } finally {
                     btSending = false;
 

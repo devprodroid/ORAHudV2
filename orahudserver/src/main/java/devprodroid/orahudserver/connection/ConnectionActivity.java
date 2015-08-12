@@ -94,7 +94,7 @@ public class ConnectionActivity extends AppCompatActivity implements SwipeRefres
         try {
             Log.e(TAG, "Initialize the drone ..");
             drone.start();
-            drone.getCommandManager().setNavDataDemo(false);
+           drone.getCommandManager().setNavDataDemo(false);
 
 
         } catch (Exception exc) {
@@ -137,13 +137,6 @@ public class ConnectionActivity extends AppCompatActivity implements SwipeRefres
     protected void onPause() {
         super.onPause();
 
-        YADroneApplication app = (YADroneApplication) getApplication();
-        IARDrone drone = app.getARDrone();
-      // drone.getNavDataManager().removeWifiListener(this);
-      // drone.getNavDataManager().removeBatteryListener(this);
-       // drone.stop();
-
-       //ccc
     }
 
     @Override

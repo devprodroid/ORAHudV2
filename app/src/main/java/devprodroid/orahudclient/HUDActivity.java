@@ -343,9 +343,7 @@ public class HUDActivity extends Activity {
         // Update UI Elements
 
         final TextView tvText = (TextView) findViewById(R.id.tv2);
-        tvText.setText("Altitude: " + dataModel.getAltitude().toString());
-
-
+        tvText.setText("Yaw: " + dataModel.getYaw().toString());
 
     }
 

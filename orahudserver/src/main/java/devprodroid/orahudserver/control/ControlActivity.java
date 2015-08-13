@@ -33,6 +33,7 @@ import de.yadrone.base.navdata.Altitude;
 import de.yadrone.base.navdata.AltitudeListener;
 import de.yadrone.base.navdata.AttitudeListener;
 import de.yadrone.base.navdata.BatteryListener;
+
 import de.yadrone.base.navdata.MagnetoData;
 import de.yadrone.base.navdata.MagnetoListener;
 import devprodroid.bluetooth.BTClient;
@@ -46,7 +47,9 @@ import devprodroid.orahudserver.YADroneApplication;
 /**
  * This Activity displays Control interface and informations for the drone
  */
-public class ControlActivity extends Activity implements SensorEventListener, BTSocketListener.Callback, AttitudeListener, AltitudeListener, BatteryListener, AcceleroListener,MagnetoListener {
+public class ControlActivity extends Activity implements SensorEventListener,
+        BTSocketListener.Callback, AttitudeListener, AltitudeListener, BatteryListener,
+        AcceleroListener,MagnetoListener {
 
 
     public final static String MSG_BT_UUID = "MSG_BT_UUID";
@@ -98,7 +101,7 @@ public class ControlActivity extends Activity implements SensorEventListener, BT
 
         mDrone = mApp.getARDrone();
         mDroneControl = new DroneControl(mDrone);
-
+        mDrone.getCommandManager().setNavDataDemo(false);
         addDroneListeners();
 
     }
@@ -368,16 +371,12 @@ public class ControlActivity extends Activity implements SensorEventListener, BT
      * Register for drone listeners
      */
     private void addDroneListeners() {
-
-
+        //mDrone.getNavDataManager().
         mDrone.getNavDataManager().addAttitudeListener(this);
         mDrone.getNavDataManager().addBatteryListener(this);
         mDrone.getNavDataManager().addAltitudeListener(this);
         mDrone.getNavDataManager().addAcceleroListener(this);
         mDrone.getNavDataManager().addMagnetoListener(this);
-
-
-
     }
 
     public void onPause() {
@@ -396,7 +395,6 @@ public class ControlActivity extends Activity implements SensorEventListener, BT
      * unregister drone listeners
      */
     private void removeDroneListeners() {
-
         mDrone.getNavDataManager().removeAttitudeListener(this);
         mDrone.getNavDataManager().removeBatteryListener(this);
         mDrone.getNavDataManager().removeAltitudeListener(this);
@@ -406,12 +404,10 @@ public class ControlActivity extends Activity implements SensorEventListener, BT
 
 
     public void attitudeUpdated(final float pitch, final float roll, final float yaw) {
-
         mDataModel.setPitch(Math.round(pitch / 1000));
         mDataModel.setRoll(Math.round(roll / 1000));
         mDataModel.setYaw(Math.round(yaw / 1000));
         new SendtoBT().execute();
-
     }
 
     public void attitudeUpdated(float arg0, float arg1) {
@@ -465,7 +461,7 @@ public class ControlActivity extends Activity implements SensorEventListener, BT
 
     @Override
     public void receivedAltitude(int altitude) {
-
+        Log.d("Altitude", "recieved "+altitude);
     }
 
     @Override
@@ -479,7 +475,7 @@ public class ControlActivity extends Activity implements SensorEventListener, BT
 
         mDataModel.setAltitude(altitude.getRaw());
 
-        //Log.d("Zvelocity", "recieved "+zVel);
+        Log.d("Zvelocity", "recieved " + zVel);
     }
 
     @Override
@@ -523,6 +519,8 @@ public class ControlActivity extends Activity implements SensorEventListener, BT
 
 
     }
+
+
 
 
     private class SendtoBT extends AsyncTask<Float, Void, Boolean> {

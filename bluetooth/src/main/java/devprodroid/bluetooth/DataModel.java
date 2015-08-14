@@ -117,7 +117,7 @@ public class DataModel {
 
     public void updateFields() {
 
-        if(FlightData[6]>0) {//validate battery level for simple detection of connection errors
+        if(FlightData[6]>0) {//validate battery level for simple detection of comm errors
 
             pitch = FlightData[0];
             roll = FlightData[1];

@@ -5,5 +5,12 @@
     <string name="dummy_content">DUMMY\nCONTENT</string>
     <string name="btn_bt_start">Start</string>
     <string name="btn_bt_stop">Stop</string>
+    <string name="lblBatt">"Batt: "</string>
+    <string name="lblYaw">"Yaw: "</string>
+    <string name="lblNoBTAdapter">No bluetooth adapter detected/available.</string>
+    <string name="lblBTDisabled">Bluetooth is DISABLED. Asking the user</string>
+    <string name="lblBTNotRunning">Bluetooth not running</string>
+    <string name="lblIncorrectUUID">Incorrect Bluetooth UUID</string>
+    <string name="lblAlt">"Alt: "</string>
 
 </resources>

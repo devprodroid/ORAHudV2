@@ -182,7 +182,7 @@ public class ControlActivity extends Activity implements SensorEventListener,
         if (mSensor != null) {
             // Success! There's an accelerometer
             mSensorManager.registerListener(this, mSensor,
-                    SensorManager.SENSOR_DELAY_GAME);
+                    SensorManager.SENSOR_DELAY_NORMAL);
         } else {
             Toast.makeText(this, "This device doesnt support STRING_TYPE_ACCELEROMETER",
                     Toast.LENGTH_SHORT).show();
@@ -361,9 +361,8 @@ public class ControlActivity extends Activity implements SensorEventListener,
         initDrone();
        // addDroneListeners();
 
-        mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_GAME);
-
-        mDroneControl.startThread();
+        mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_NORMAL);
+                mDroneControl.startThread();
 
     }
 
@@ -461,7 +460,7 @@ public class ControlActivity extends Activity implements SensorEventListener,
 
     @Override
     public void receivedAltitude(int altitude) {
-        Log.d("Altitude", "recieved "+altitude);
+
     }
 
     @Override
@@ -473,9 +472,9 @@ public class ControlActivity extends Activity implements SensorEventListener,
             mDataModel.setAccZ(zVel);
 
 
-        mDataModel.setAltitude(altitude.getRaw());
+        mDataModel.setAltitude(altitude.getRef());
 
-        Log.d("Zvelocity", "recieved " + zVel);
+       // Log.d("Zvelocity", "recieved " + zVel);
     }
 
     @Override

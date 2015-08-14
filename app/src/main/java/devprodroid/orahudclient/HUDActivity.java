@@ -43,6 +43,10 @@ public class HUDActivity extends Activity {
     private float lastX;
 
 
+
+    private TextView tvBattery;
+    private TextView tvAltitude;
+
     /**
      * Whether or not the system UI should be auto-hidden after
      * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
@@ -108,64 +112,6 @@ public class HUDActivity extends Activity {
         isBluetoothAvailable();
 
 
-        // Set up an instance of SystemUiHider to control the system UI for
-        // this activity.
-//        mSystemUiHider = SystemUiHider.getInstance(this, contentView, HIDER_FLAGS);
-//        mSystemUiHider.setup();
-//        mSystemUiHider
-//                .setOnVisibilityChangeListener(new SystemUiHider.OnVisibilityChangeListener() {
-//                    // Cached values.
-//                    int mControlsHeight;
-//                    int mShortAnimTime;
-//
-//                    @Override
-//                    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
-//                    public void onVisibilityChange(boolean visible) {
-//                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-//                            // If the ViewPropertyAnimator API is available
-//                            // (Honeycomb MR2 and later), use it to animate the
-//                            // in-layout UI controls at the bottom of the
-//                            // screen.
-//
-//                            if (mControlsHeight == 0) {
-//                                mControlsHeight = controlsView.getHeight();
-//                            }
-//                            if (mShortAnimTime == 0) {
-//                                mShortAnimTime = getResources().getInteger(
-//                                        android.R.integer.config_shortAnimTime);
-//                            }
-//                            controlsView.animate()
-//                                    .translationY(visible ? 0 : mControlsHeight)
-//                                    .setDuration(mShortAnimTime);
-//                        } else {
-//                            // If the ViewPropertyAnimator APIs aren't
-//                            // available, simply show or hide the in-layout UI
-//                            // controls.
-//                            controlsView.setVisibility(visible ? View.VISIBLE : View.GONE);
-//                        }
-//
-//                        if (visible && AUTO_HIDE) {
-//                            // Schedule a hide().
-//                            delayedHide(AUTO_HIDE_DELAY_MILLIS);
-//                        }
-//                    }
-//                });
-//
-//        // Set up the user interaction to manually show or hide the system UI.
-//        contentView.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                if (TOGGLE_ON_CLICK) {
-//                    mSystemUiHider.toggle();
-//                } else {
-//                    mSystemUiHider.show();
-//                }
-//            }
-//        });
-
-        // Upon interacting with UI controls, delay any scheduled hide()
-        // operations to prevent the jarring behavior of controls going away
-        // while interacting with the UI.
 
 
         Button bt_connectBtn = (Button) findViewById(R.id.btn_bt_connect);
@@ -178,6 +124,8 @@ public class HUDActivity extends Activity {
         });
 
 
+        tvBattery = (TextView) findViewById(R.id.tvBattery);
+        tvAltitude = (TextView) findViewById(R.id.tvAltitude);
     }
 
 
@@ -193,7 +141,7 @@ public class HUDActivity extends Activity {
                 try {
                     UUID.fromString(serv_UUID);
                 } catch (IllegalArgumentException e) {
-                    showError("Incorrect Bluetooth UUID");
+                    showError(getString(R.string.lblIncorrectUUID));
                     return;
                 }
 
@@ -202,7 +150,7 @@ public class HUDActivity extends Activity {
                     startBTService();
                 } catch (Exception e) {
 
-                    showError("Bluetooth not running");
+                    showError(getString(R.string.lblBTNotRunning));
 
                 }
             } else {
@@ -331,7 +279,7 @@ public class HUDActivity extends Activity {
 
 
     /**
-     * Modify ui according to recieved bluetoth messages
+     * Modify ui according to recieved bluetooth messages
      *
      * @param intent Intent with Payload
      */
@@ -342,8 +290,13 @@ public class HUDActivity extends Activity {
 
         // Update UI Elements
 
+
+        //HUD Values
+        tvBattery.setText(getString(R.string.lblBatt)+ dataModel.getBatteryLevel()+"%" );
+        tvAltitude.setText(getString(R.string.lblAlt)+ dataModel.getAltitude()+"m" );
+
         final TextView tvText = (TextView) findViewById(R.id.tv2);
-        tvText.setText("Yaw: " + dataModel.getYaw().toString());
+        tvText.setText(getString(R.string.lblYaw) + dataModel.getYaw().toString());
 
     }
 
@@ -360,37 +313,6 @@ public class HUDActivity extends Activity {
     }
 
 
-    /**
-     * Touch listener to use for in-layout UI controls to delay hiding the
-     * system UI. This is to prevent the jarring behavior of controls going away
-     * while interacting with activity UI.
-     */
-//    View.OnTouchListener mDelayHideTouchListener = new View.OnTouchListener() {
-//        @Override
-//        public boolean onTouch(View view, MotionEvent motionEvent) {
-//            if (AUTO_HIDE) {
-//                delayedHide(AUTO_HIDE_DELAY_MILLIS);
-//            }
-//            return false;
-//        }
-//    };
-
-//    Handler mHideHandler = new Handler();
-//    Runnable mHideRunnable = new Runnable() {
-//        @Override
-//        public void run() {
-//            mSystemUiHider.hide();
-//        }
-//    };
-
-    /**
-     * Schedules a call to hide() in [delay] milliseconds, canceling any
-     * previously scheduled calls.
-     */
-//    private void delayedHide(int delayMillis) {
-//        mHideHandler.removeCallbacks(mHideRunnable);
-//        mHideHandler.postDelayed(mHideRunnable, delayMillis);
-//    }
     public void showError(final String msg) {
         runOnUiThread(new Runnable() {
             @Override
@@ -425,7 +347,7 @@ public class HUDActivity extends Activity {
         BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
         if (mBluetoothAdapter == null) {
-            Log.e("BTDeviceDiscover", "No bluetooth adapter detected/available.");
+            Log.e("BTDeviceDiscover", getString(R.string.lblNoBTAdapter));
             return false;
         }
         //Check if bluetooth is enabled.
@@ -433,7 +355,7 @@ public class HUDActivity extends Activity {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
 
-            Log.e("BTDeviceDiscover", "Bluetooth is DISABLED. Asking the user");
+            Log.e("BTDeviceDiscover", getString(R.string.lblBTDisabled));
             return false;
         }
         return true;

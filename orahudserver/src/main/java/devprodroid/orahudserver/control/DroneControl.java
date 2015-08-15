@@ -44,7 +44,9 @@ public class DroneControl implements Runnable {
 
     public DroneControl(IARDrone aDrone) {
         drone = aDrone;
+        drone.start();
         cmd = drone.getCommandManager();
+        cmd.setNavDataDemo(false);
         startThread();
     }
 
@@ -64,6 +66,8 @@ public class DroneControl implements Runnable {
     public void stopThread() {
         running = false;
         land();
+        Log.d("Drone", "Landing");
+        setIsFlying(false);
         boolean retry = true;
         while (retry) {
             try {
@@ -81,45 +85,48 @@ public class DroneControl implements Runnable {
     public void run() {
 
         //if no action is performed, the drone shall hover
-        boolean performAction = false;
+        boolean performAction;
 
         if (isRotateMode())
-        Log.d("ControlMode", "Rotate");
+            Log.d("ControlMode", "Rotate");
         if (isTranslateMode())
-        Log.d("ControlMode", "Translate");
+            Log.d("ControlMode", "Translate");
 
-        while ((running) && (cmd.isConnected())) {
-            performAction = false;
-            if (isFlying()) {
+        while (running) {
+            if (cmd.isConnected()) {
+                performAction = false;
+                if (isFlying()) {
 
-                if ((isTranslateMode()) && (isTiltControlActive())) {
-                    //Pitch movement
-                    performAction = pitchUpDown();
+                    if ((isTranslateMode()) && (isTiltControlActive())) {
+                        //Pitch movement
+                        performAction = pitchUpDown();
 
-                    //Roll Movement
-                    performAction =  rollLeftRight()||performAction;
-                } else if ((isRotateMode())&& (isTiltControlActive())){
-                    //Pitch movement
-                    performAction = pitchUpDown();
+                        //Roll Movement
+                        performAction = rollLeftRight() || performAction;
+                    } else if ((isRotateMode()) && (isTiltControlActive())) {
+                        //Pitch movement
+                        performAction = pitchUpDown();
 
-                    //Roll Movement
-                    performAction =  spinLeftRight()|| performAction;
+                        //Roll Movement
+                        performAction = spinLeftRight() || performAction;
+                    }
+
+                    //UpDown Movement
+                    performAction = goUpDown() || performAction;
+                    //We sleep for 20ms for performance reasons
+
+
+                    //TODO: this is experimental and may lead to wired behavior of the drone, however we want to make sure that the drone hoverss
+                    if ((!performAction)||(!controlActive)) {
+                        hover();
+                    }
+
+
                 }
-
-                //UpDown Movement
-                performAction = goUpDown()|| performAction;
-                //We sleep for 20ms for performance reasons
-
-
-                //TODO: this is experimental and may lead to wired behavior of the drone, however we want to make sure that the drone hovers
-
-                if (!performAction) {
-                    hover();
-                }
-
+                sleep(sleepDuration);
+            } else {
                 //if the Controller is not connected, the Drone needs to land, so that nothing
                 //unexpected happens
-            } else {
                 if (isFlying()) {
                     cmd.landing();
                     Log.d("Drone", "Landing");
@@ -127,7 +134,6 @@ public class DroneControl implements Runnable {
                     sleep(200);
                 }
             }
-            sleep(sleepDuration);
         }
     }
 
@@ -196,12 +202,12 @@ public class DroneControl implements Runnable {
 
         if (getRoll_angleNormed() > 20) {
             //right
-            cmd.spinRight(getRoll_angleControl()*5);
+            cmd.spinRight(getRoll_angleControl() * 5);
             Log.e("Command", "spin right: " + getRoll_angleControl());
             return true;
         } else if (getRoll_angleNormed() < -20) {
             //left
-            cmd.spinLeft(getRoll_angleControl()*5);
+            cmd.spinLeft(getRoll_angleControl() * 5);
             Log.e("Command", "spin left: " + getRoll_angleControl());
             return true;
 
@@ -307,6 +313,7 @@ public class DroneControl implements Runnable {
      */
     public void hover() {
         drone.hover();
+
 
     }
 

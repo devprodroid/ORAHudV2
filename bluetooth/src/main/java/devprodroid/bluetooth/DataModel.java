@@ -15,7 +15,6 @@ public class DataModel {
      */
     private int[] FlightData;
 
-
     //from AttitudeListener
     private Integer pitch=0;
     private Integer roll=0;
@@ -39,9 +38,38 @@ public class DataModel {
 
     public DataModel() {
         FlightData = new int[64];
+
         linkValuesToArrayIndices();
 
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     /**
      * Generates an Integer array from a byte array array
      * @param src The Byte Array
@@ -55,7 +83,7 @@ public class DataModel {
                 int j = i << 2;
                 int x = 0;
                 x += (src[j++] & 0xff) << 0;
-                x += (src[j++] & 0xff) << 8;//three weeks lifetime wasted
+                x += (src[j++] & 0xff) << 8;
                 x += (src[j++] & 0xff) << 16;
                 x += (src[j++] & 0xff) << 24;
                 dst[i] = x;
@@ -85,7 +113,11 @@ public class DataModel {
         return dst;
     }
 
+
+
+
     public byte[] getFlightDataByteArray() {
+        linkValuesToArrayIndices();
         return int2byte(FlightData);
     }
 
@@ -101,6 +133,7 @@ public class DataModel {
 
     private void linkValuesToArrayIndices() {
 
+
         FlightData[0] = pitch;
         FlightData[1] = roll;
         FlightData[2] = yaw;
@@ -112,6 +145,8 @@ public class DataModel {
 
         FlightData[6] = batteryLevel;
         FlightData[7] = accZ;
+
+
     }
 
 
@@ -143,7 +178,7 @@ public class DataModel {
 
     public void setPitch(int pitch) {
         this.pitch = pitch;
-        linkValuesToArrayIndices();
+       // linkValuesToArrayIndices();
     }
 
     public Integer getRoll() {
@@ -152,7 +187,7 @@ public class DataModel {
 
     public void setRoll(int roll) {
         this.roll = roll;
-        linkValuesToArrayIndices();
+        //linkValuesToArrayIndices();
     }
 
     public Integer getYaw() {
@@ -161,7 +196,7 @@ public class DataModel {
 
     public void setYaw(int yaw) {
         this.yaw = yaw;
-        linkValuesToArrayIndices();
+       // linkValuesToArrayIndices();
     }
 
     public Integer getPitchCompensation() {
@@ -170,7 +205,7 @@ public class DataModel {
 
     public void setPitchCompensation(int pitchCompensation) {
         this.pitchCompensation = pitchCompensation;
-        linkValuesToArrayIndices();
+       // linkValuesToArrayIndices();
     }
 
     public Integer getRollCompensation() {
@@ -179,12 +214,12 @@ public class DataModel {
 
     public void setRollCompensation(int rollCompensation) {
         this.rollCompensation = rollCompensation;
-        linkValuesToArrayIndices();
+       // linkValuesToArrayIndices();
     }
 
     public void setAltitude(int altitude) {
         this.altitude = altitude;
-        linkValuesToArrayIndices();
+        //linkValuesToArrayIndices();
     }
 
     public Integer getAltitude() {
@@ -194,7 +229,7 @@ public class DataModel {
 
     public void setBatteryLevel(int batteryLevel) {
         this.batteryLevel = batteryLevel;
-        linkValuesToArrayIndices();
+       // linkValuesToArrayIndices();
     }
 
     public Integer getBatteryLevel() {
@@ -203,7 +238,7 @@ public class DataModel {
 
     public void setVoltage(Integer voltage) {
         this.voltage = voltage;
-        linkValuesToArrayIndices();
+       // linkValuesToArrayIndices();
     }
 
     public Integer getAccZ() {
@@ -217,7 +252,7 @@ public class DataModel {
 
     public void setAccZ(Integer accZ) {
         this.accZ = accZ;
-        linkValuesToArrayIndices();
+       // linkValuesToArrayIndices();
     }
 
     @Override

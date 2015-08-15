@@ -63,12 +63,7 @@ public class ConnectionActivity extends AppCompatActivity implements SwipeRefres
                 android.R.color.holo_orange_light,
                 android.R.color.holo_red_light);
 
-
-        //Add WIfi for Drone Connection
-
         initializeWifi();
-
-    //    initializeDrone();
     }
 
     private void initializeWifi() {
@@ -87,28 +82,6 @@ public class ConnectionActivity extends AppCompatActivity implements SwipeRefres
 
     }
 
-    private void initializeDrone() {
-        YADroneApplication app = (YADroneApplication) getApplication();
-        final IARDrone drone = app.getARDrone();
-
-        try {
-            Log.e(TAG, "Initialize the drone ..");
-            drone.start();
-           drone.getCommandManager().setNavDataDemo(false);
-
-
-        } catch (Exception exc) {
-
-            if (drone != null)
-                drone.stop();
-        }
-
-
-       // drone.getNavDataManager().addWifiListener(this);
-      //  drone.getNavDataManager().addBatteryListener(this);
-
-
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -137,6 +110,10 @@ public class ConnectionActivity extends AppCompatActivity implements SwipeRefres
     protected void onPause() {
         super.onPause();
 
+        YADroneApplication app = (YADroneApplication) getApplication();
+        IARDrone drone = app.getARDrone();
+        drone.landing();
+        drone.stop();
     }
 
     @Override
@@ -219,7 +196,7 @@ public class ConnectionActivity extends AppCompatActivity implements SwipeRefres
 
 
                                 //Start the main activity
-                             //   initializeDrone();
+
                                 intent.putExtra(ControlActivity.MSG_BT_UUID, ConnectionActivity.serv_UUID.toString());
                                 intent.putExtra(ControlActivity.MSG_MAC_BT_DEVICE_ADDRESS, btDevice.getAddress());
 
@@ -241,25 +218,13 @@ public class ConnectionActivity extends AppCompatActivity implements SwipeRefres
 
         //Refresh the listview of MAC addresses and names.
         RefreshDeviceList();
-        initializeDrone();
+
     }
 
 @Override
     public void onDestroy() {
     super.onDestroy();
 
-        if (handler!=null) {
-            //unregisterReceiver(handler);
-            handler=null;
-        }
-
-
-
-        YADroneApplication app = (YADroneApplication) getApplication();
-    IARDrone drone = app.getARDrone();
-    drone.getNavDataManager().removeWifiListener(this);
-    drone.getNavDataManager().removeBatteryListener(this);
-    drone.stop();
     finish();
 }
     /**
@@ -311,7 +276,7 @@ public class ConnectionActivity extends AppCompatActivity implements SwipeRefres
     public void onBtnClicked(View v) {
 
         if (v.getId() == R.id.btnDrone) {
-            initializeDrone();
+        //    initializeDrone();
 
         }
     }

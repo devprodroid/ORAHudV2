@@ -83,10 +83,18 @@ public class ControlActivity extends Activity implements SensorEventListener,
         tv = (TextView) findViewById(R.id.tv);
 
         registerSensors();
+        initDrone();
+        // addDroneListeners();
 
+        mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_NORMAL);
+        mDroneControl.startThread();
+        mDroneSendRunning = true;
+
+        startHandler();
         initButtons();
 
         initDataModel();
+
 
         initBluetoothConnection();
 
@@ -100,8 +108,9 @@ public class ControlActivity extends Activity implements SensorEventListener,
         mApp = (YADroneApplication) getApplication();
 
         mDrone = mApp.getARDrone();
+
         mDroneControl = new DroneControl(mDrone);
-        mDrone.getCommandManager().setNavDataDemo(false);
+
         addDroneListeners();
 
     }
@@ -267,61 +276,7 @@ public class ControlActivity extends Activity implements SensorEventListener,
             }
         });
 
-//      btn_goUp
-//      btn_goDown
 
-
-//
-//        Button up = (Button) findViewById(R.id.cmd_up);
-//        up.setOnTouchListener(new OnTouchListener() {
-//            public boolean onTouch(View v, MotionEvent event) {
-//                if (event.getAction() == MotionEvent.ACTION_DOWN)
-//                    mDrone.getCommandManager().up(40);
-//                else if (event.getAction() == MotionEvent.ACTION_UP)
-//                    mDroneControl.hover();
-//
-//                return true;
-//            }
-//        });
-//
-//        Button down = (Button) findViewById(R.id.cmd_down);
-//        down.setOnTouchListener(new OnTouchListener() {
-//            public boolean onTouch(View v, MotionEvent event) {
-//                if (event.getAction() == MotionEvent.ACTION_DOWN)
-//                    mDrone.getCommandManager().down(40);
-//                else if (event.getAction() == MotionEvent.ACTION_UP)
-//                    mDroneControl.hover();
-//
-//                return true;
-//            }
-//        });
-//
-//
-//        Button spinLeft = (Button) findViewById(R.id.cmd_spin_left);
-//        spinLeft.setOnTouchListener(new OnTouchListener() {
-//            public boolean onTouch(View v, MotionEvent event) {
-//                if (event.getAction() == MotionEvent.ACTION_DOWN)
-//                    mDrone.getCommandManager().spinLeft(20);
-//
-//                else if (event.getAction() == MotionEvent.ACTION_UP)
-//                    mDroneControl.hover();
-//
-//                return true;
-//            }
-//        });
-//
-//
-//        Button spinRight = (Button) findViewById(R.id.cmd_spin_right);
-//        spinRight.setOnTouchListener(new OnTouchListener() {
-//            public boolean onTouch(View v, MotionEvent event) {
-//                if (event.getAction() == MotionEvent.ACTION_DOWN)
-//                    mDrone.getCommandManager().spinRight(20);
-//                else if (event.getAction() == MotionEvent.ACTION_UP)
-//                    mDroneControl.hover();
-//
-//                return true;
-//            }
-//        });
 
         final Button landing = (Button) findViewById(R.id.cmd_landing);
         landing.setOnClickListener(new OnClickListener() {
@@ -350,7 +305,7 @@ public class ControlActivity extends Activity implements SensorEventListener,
         );
     }
 
-
+    @Override
     public void onResume() {
         super.onResume();
 
@@ -376,7 +331,7 @@ public class ControlActivity extends Activity implements SensorEventListener,
         mDrone.getNavDataManager().addAcceleroListener(this);
         mDrone.getNavDataManager().addMagnetoListener(this);
     }
-
+    @Override
     public void onPause() {
         super.onPause();
         mDroneSendRunning = false;
@@ -384,7 +339,12 @@ public class ControlActivity extends Activity implements SensorEventListener,
 
         removeDroneListeners();
 
+        mDrone.stop();
+
+
         mSensorManager.unregisterListener(this);
+
+
         //  finish();
 
 
@@ -547,7 +507,8 @@ public class ControlActivity extends Activity implements SensorEventListener,
 
                         }
                     }
-                handler.postDelayed(this, 50);
+               if (mDroneSendRunning)
+                   handler.postDelayed(this, 50);
             }
         }, 50);
 

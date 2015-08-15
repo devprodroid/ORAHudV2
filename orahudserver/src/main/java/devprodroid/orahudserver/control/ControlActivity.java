@@ -33,7 +33,6 @@ import de.yadrone.base.navdata.Altitude;
 import de.yadrone.base.navdata.AltitudeListener;
 import de.yadrone.base.navdata.AttitudeListener;
 import de.yadrone.base.navdata.BatteryListener;
-
 import de.yadrone.base.navdata.MagnetoData;
 import de.yadrone.base.navdata.MagnetoListener;
 import devprodroid.bluetooth.BTClient;
@@ -49,7 +48,7 @@ import devprodroid.orahudserver.YADroneApplication;
  */
 public class ControlActivity extends Activity implements SensorEventListener,
         BTSocketListener.Callback, AttitudeListener, AltitudeListener, BatteryListener,
-        AcceleroListener,MagnetoListener {
+        AcceleroListener, MagnetoListener {
 
 
     public final static String MSG_BT_UUID = "MSG_BT_UUID";
@@ -70,6 +69,7 @@ public class ControlActivity extends Activity implements SensorEventListener,
     private SensorManager mSensorManager;
     private Sensor mSensor;
     private static TextView tv;
+    private boolean mDroneSendRunning = false;
 
     public static byte[] float2ByteArray(float value) {
         return ByteBuffer.allocate(4).putFloat(value).array();
@@ -210,8 +210,7 @@ public class ControlActivity extends Activity implements SensorEventListener,
                     mDroneControl.setTranslateMode();
                     mDroneControl.setControlActive(true);
 
-                }
-                else if (event.getAction() == MotionEvent.ACTION_UP){
+                } else if (event.getAction() == MotionEvent.ACTION_UP) {
                     mDroneControl.setControlActive(false);
                     mDroneControl.hover();
                 }
@@ -227,8 +226,7 @@ public class ControlActivity extends Activity implements SensorEventListener,
                     mDroneControl.setRotateMode();
 
                     mDroneControl.setControlActive(true);
-                }
-                else if (event.getAction() == MotionEvent.ACTION_UP){
+                } else if (event.getAction() == MotionEvent.ACTION_UP) {
                     mDroneControl.setControlActive(false);
                     mDroneControl.hover();
                 }
@@ -244,8 +242,7 @@ public class ControlActivity extends Activity implements SensorEventListener,
                     mDroneControl.setGoUpDemand(true);
 
 
-                }
-                else if (event.getAction() == MotionEvent.ACTION_UP){
+                } else if (event.getAction() == MotionEvent.ACTION_UP) {
                     mDroneControl.setGoUpDemand(false);
 
 
@@ -261,8 +258,7 @@ public class ControlActivity extends Activity implements SensorEventListener,
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
                     mDroneControl.setGoDownDemand(true);
 
-                }
-                else if (event.getAction() == MotionEvent.ACTION_UP){
+                } else if (event.getAction() == MotionEvent.ACTION_UP) {
                     mDroneControl.setGoDownDemand(false);
 
                 }
@@ -359,10 +355,13 @@ public class ControlActivity extends Activity implements SensorEventListener,
         super.onResume();
 
         initDrone();
-       // addDroneListeners();
+        // addDroneListeners();
 
         mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_NORMAL);
-                mDroneControl.startThread();
+        mDroneControl.startThread();
+        mDroneSendRunning = true;
+        startHandler();
+
 
     }
 
@@ -380,6 +379,7 @@ public class ControlActivity extends Activity implements SensorEventListener,
 
     public void onPause() {
         super.onPause();
+        mDroneSendRunning = false;
         mDroneControl.stopThread();
 
         removeDroneListeners();
@@ -406,7 +406,7 @@ public class ControlActivity extends Activity implements SensorEventListener,
         mDataModel.setPitch(Math.round(pitch / 1000));
         mDataModel.setRoll(Math.round(roll / 1000));
         mDataModel.setYaw(Math.round(yaw / 1000));
-        new SendtoBT().execute();
+        //    new SendtoBT().execute();
     }
 
     public void attitudeUpdated(float arg0, float arg1) {
@@ -463,29 +463,32 @@ public class ControlActivity extends Activity implements SensorEventListener,
 
     }
 
+    /**
+     * Writes Altitude and climbrate
+     *
+     * @param altitude
+     */
     @Override
     public void receivedExtendedAltitude(Altitude altitude) {
-        int zVel;
 
-        zVel = Math.round(altitude.getZVelocity());; //>10 down , <10 up
+        int zVel = Math.round(altitude.getZVelocity());
 
-            mDataModel.setAccZ(zVel);
-
+        mDataModel.setAccZ(zVel);
 
         mDataModel.setAltitude(altitude.getRef());
 
-       // Log.d("Zvelocity", "recieved " + zVel);
+
     }
 
     @Override
     public void batteryLevelChanged(int batteryLevel) {
         mDataModel.setBatteryLevel(batteryLevel);
-      //  Log.d(TAG, "AR.Drone Battery: " + batteryLevel);
+        //  Log.d(TAG, "AR.Drone Battery: " + batteryLevel);
     }
 
     @Override
     public void voltageChanged(int voltage) {
-       // //mDataModel.setVoltage(voltage);
+        // //mDataModel.setVoltage(voltage);
     }
 
     @Override
@@ -519,11 +522,41 @@ public class ControlActivity extends Activity implements SensorEventListener,
 
     }
 
+    public void startHandler() {
 
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+
+
+                    BTMessage msg = new BTMessage();
+                    if (!btSending) {
+                        try {
+                            btSending = true;
+                            if (connected) {
+                                msg.setPayload(mDataModel.getFlightDataByteArray());
+                                mBTClient.sendMessage(msg);
+                            }
+
+
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        } finally {
+                            btSending = false;
+
+                        }
+                    }
+                handler.postDelayed(this, 50);
+            }
+        }, 50);
+
+    }
 
 
     private class SendtoBT extends AsyncTask<Float, Void, Boolean> {
         BTMessage msg = new BTMessage();
+
         @Override
         protected Boolean doInBackground(Float... params) {
 
@@ -536,15 +569,18 @@ public class ControlActivity extends Activity implements SensorEventListener,
                         msg.setPayload(mDataModel.getFlightDataByteArray());
 
                         mBTClient.sendMessage(msg);
-                        //Log.d(TAG, "Send Payload"+ mDataModel.getRoll());
+
+
+                        //mDataModel.setFlightData(mDataModel.getFlightDataByteArray());
+
+                        // Log.d(TAG, "Send Payload" + mDataModel.toString());
 
 
                     }
 
 
-                } catch (IOException E) {
-                   // Log.e(TAG, E.getMessage(), E);
-                    //btSending = false;
+                } catch (IOException e) {
+                    e.printStackTrace();
                 } finally {
                     btSending = false;
 

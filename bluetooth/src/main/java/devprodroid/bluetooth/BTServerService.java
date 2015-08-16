@@ -34,6 +34,7 @@ public abstract class BTServerService extends Service implements BTSocketListene
             throw new IllegalArgumentException("Invalid server name.");
         } else {
             this.serverUUID = UUID.fromString(intent.getStringExtra("MSG_BT_UUID"));
+            Log.d("UUID", this.serverUUID.toString());
             this.btAdapter = BluetoothAdapter.getDefaultAdapter();
             Runnable onBTEnabled = new Runnable() {
                 public void run() {

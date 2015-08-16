@@ -55,7 +55,7 @@ public class ControlActivity extends Activity implements SensorEventListener,
     public final static String MSG_MAC_BT_DEVICE_ADDRESS = "MSG_MAC_BT_DEVICE_ADDRESS";
     private final static int INTERVAL = 500;
     private final String TAG = getClass().getPackage().getName();
-    Handler mHandler;
+    private Handler mHandler;
     private boolean connected = false;
     private BluetoothDevice device;
     private BTClient mBTClient;
@@ -90,7 +90,7 @@ public class ControlActivity extends Activity implements SensorEventListener,
         mDroneControl.startThread();
         mDroneSendRunning = true;
 
-        startHandler();
+        //startHandler();
         initButtons();
 
         initDataModel();
@@ -299,6 +299,7 @@ public class ControlActivity extends Activity implements SensorEventListener,
                                      {
                                          public void onClick(View v) {
                                              mDrone.reset();
+                                             Log.d("DebugLand", "reset");
                                          }
                                      }
 
@@ -334,12 +335,20 @@ public class ControlActivity extends Activity implements SensorEventListener,
     @Override
     public void onPause() {
         super.onPause();
+
+
+        mHandler.removeCallbacksAndMessages(mHandler);
+
         mDroneSendRunning = false;
+        mDroneControl.setStop(true);
+
         mDroneControl.stopThread();
+
 
         removeDroneListeners();
 
         mDrone.stop();
+        Log.d("DebugLand", "onPause");
 
 
         mSensorManager.unregisterListener(this);
@@ -484,8 +493,10 @@ public class ControlActivity extends Activity implements SensorEventListener,
 
     public void startHandler() {
 
-        final Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
+
+        mHandler = new Handler();
+
+        mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
 
@@ -508,7 +519,7 @@ public class ControlActivity extends Activity implements SensorEventListener,
                         }
                     }
                if (mDroneSendRunning)
-                   handler.postDelayed(this, 50);
+                   mHandler.postDelayed(this, 50);
             }
         }, 50);
 

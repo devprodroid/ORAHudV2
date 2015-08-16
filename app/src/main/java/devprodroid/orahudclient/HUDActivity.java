@@ -139,6 +139,7 @@ public class HUDActivity extends Activity {
                 //Service is stopped.
                 // Check the UUID
                 try {
+
                     UUID.fromString(serv_UUID);
                 } catch (IllegalArgumentException e) {
                     showError(getString(R.string.lblIncorrectUUID));
@@ -210,6 +211,7 @@ public class HUDActivity extends Activity {
                 }
                 break;
         }
+      //  glSurfaceView.requestRender();
         return false;
     }
 
@@ -264,6 +266,7 @@ public class HUDActivity extends Activity {
         startBTService();
 
         glSurfaceView.onResume();
+        glSurfaceView.requestRender();
     }
 
     @Override
@@ -297,6 +300,7 @@ public class HUDActivity extends Activity {
 
         final TextView tvText = (TextView) findViewById(R.id.tv2);
         tvText.setText(getString(R.string.lblYaw) + dataModel.getYaw().toString());
+        //glSurfaceView.requestRender();
 
     }
 

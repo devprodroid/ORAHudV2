@@ -11,7 +11,7 @@ import de.yadrone.base.command.CommandManager;
  * computing the movement from the roll and pitch values set externally for the calling class
  */
 public class DroneControl implements Runnable {
-    private boolean running = false;
+    private static Boolean stop = false;
 
     private IARDrone drone;
     private CommandManager cmd;
@@ -19,9 +19,8 @@ public class DroneControl implements Runnable {
     private float pitch_angle;
     private float roll_angle;
 
-    private boolean isConnected = true;
 
-    private boolean isFlying = false;
+    private static boolean  isFlying = false;
 
 
     private final String TAG = getClass().getPackage().getName();
@@ -33,13 +32,13 @@ public class DroneControl implements Runnable {
     private final int sleepDuration = 100;
 
     private Thread myThread;
-    private boolean translateMode;
-    private boolean rotateMode;
-    private boolean controlActive;
+    private static boolean translateMode;
+    private static boolean rotateMode;
+    private static boolean controlActive;
 
 
-    private boolean goUpDemand;
-    private boolean goDownDemand;
+    private static boolean goUpDemand;
+    private static boolean goDownDemand;
 
 
     public DroneControl(IARDrone aDrone) {
@@ -47,16 +46,20 @@ public class DroneControl implements Runnable {
         drone.start();
         cmd = drone.getCommandManager();
         cmd.setNavDataDemo(false);
+      //  cmd.setMaxAltitude(3000);
+        cmd.setOutdoor(false, false);
+
+
         startThread();
     }
 
     /**
      * Start the Command Runner Thread
      */
-    public void startThread() {
-        running = true;
+    public void startThread() { setStop(false);
         myThread = new Thread(this);
         myThread.start();
+
 
     }
 
@@ -64,22 +67,25 @@ public class DroneControl implements Runnable {
      * Stop the Command Runner thread
      */
     public void stopThread() {
-        running = false;
+
         land();
         Log.d("Drone", "Landing");
         setIsFlying(false);
-        boolean retry = true;
-        while (retry) {
-            try {
-                myThread.join();
-                retry = false;
-            } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        }
+
+        setStop(true);
     }
 
+
+
+
+
+    public Boolean getStop() {
+        return stop;
+    }
+
+    public void setStop(Boolean stop) {
+        this.stop = stop;
+    }
 
     @Override
     public void run() {
@@ -87,12 +93,7 @@ public class DroneControl implements Runnable {
         //if no action is performed, the drone shall hover
         boolean performAction;
 
-        if (isRotateMode())
-            Log.d("ControlMode", "Rotate");
-        if (isTranslateMode())
-            Log.d("ControlMode", "Translate");
-
-        while (running) {
+        while (!this.getStop()) {
             if (cmd.isConnected()) {
                 performAction = false;
                 if (isFlying()) {
@@ -114,14 +115,6 @@ public class DroneControl implements Runnable {
                     //UpDown Movement
                     performAction = goUpDown() || performAction;
                     //We sleep for 20ms for performance reasons
-
-
-                    //TODO: this is experimental and may lead to wired behavior of the drone, however we want to make sure that the drone hoverss
-                    if ((!performAction)||(!controlActive)) {
-                        hover();
-                    }
-
-
                 }
                 sleep(sleepDuration);
             } else {
@@ -129,9 +122,9 @@ public class DroneControl implements Runnable {
                 //unexpected happens
                 if (isFlying()) {
                     cmd.landing();
-                    Log.d("Drone", "Landing");
+                    Log.d("DebugLand", "DebugLand");
                     setIsFlying(false);
-                    sleep(200);
+                    sleep(sleepDuration);
                 }
             }
         }
@@ -305,6 +298,7 @@ public class DroneControl implements Runnable {
         if (isFlying()) {
             drone.landing();
             setIsFlying(false);
+            Log.d("DebugLand", "DebugLand");
         }
     }
 
@@ -313,6 +307,7 @@ public class DroneControl implements Runnable {
      */
     public void hover() {
         drone.hover();
+        Log.d(TAG, "Hover");
 
 
     }
@@ -340,7 +335,9 @@ public class DroneControl implements Runnable {
     }
 
     public boolean isTiltControlActive() {
+        Log.d(TAG, "isTiltControlActive " + Boolean.toString(this.controlActive));
         return this.controlActive;
+
     }
 
     //Rotation and up down movement

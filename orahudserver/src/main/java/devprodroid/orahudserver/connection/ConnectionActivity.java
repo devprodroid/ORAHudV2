@@ -110,10 +110,11 @@ public class ConnectionActivity extends AppCompatActivity implements SwipeRefres
     protected void onPause() {
         super.onPause();
 
-        YADroneApplication app = (YADroneApplication) getApplication();
-        IARDrone drone = app.getARDrone();
-        drone.landing();
-        drone.stop();
+       // YADroneApplication app = (YADroneApplication) getApplication();
+      //  IARDrone drone = app.getARDrone();
+      //  drone.landing();
+       // drone.stop();
+       // drone.reset();
     }
 
     @Override
@@ -233,6 +234,9 @@ public class ConnectionActivity extends AppCompatActivity implements SwipeRefres
      */
     private void RefreshDeviceList() {
         try {
+
+            initializeWifi();
+
             BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
             //Flush the list of valid devices

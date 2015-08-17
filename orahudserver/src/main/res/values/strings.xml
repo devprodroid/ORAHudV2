@@ -5,5 +5,9 @@
     <string name="pick_server">Pick BT Server</string>
     <string name="refresh">Refresh</string>
     <string name="title_activity_control">ControlActivity</string>
+    <string name="prefDebugSummary">Enable Debug Console Output</string>
+    <string name="prefDebugTitle">Debug Mode</string>
+    <string name="prefOutdoorTitle">Outdoor Flight</string>
+    <string name="prefOutdoorSummary">Configure Drone to Outdoor Flight</string>
 
 </resources>

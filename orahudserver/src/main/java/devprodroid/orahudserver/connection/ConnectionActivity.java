@@ -8,10 +8,12 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.ParcelUuid;
+import android.preference.PreferenceManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -33,6 +35,7 @@ import de.yadrone.base.IARDrone;
 import de.yadrone.base.navdata.BatteryListener;
 import de.yadrone.base.navdata.WifiListener;
 import devprodroid.orahudserver.R;
+import devprodroid.orahudserver.SettingsActivity;
 import devprodroid.orahudserver.YADroneApplication;
 import devprodroid.orahudserver.control.ControlActivity;
 
@@ -42,7 +45,7 @@ public class ConnectionActivity extends AppCompatActivity implements SwipeRefres
 
     private static final String TAG = ConnectionActivity.class.getName();
     private static final int REQUEST_ENABLE_BT = 1;
-
+    public boolean mDebugMode;
     private static final UUID serv_UUID = UUID.fromString("07419c1a-090c-11e5-a6c0-1697f925ec7b");
     List<BluetoothDevice> validDevices = new ArrayList<>();
 
@@ -99,6 +102,8 @@ public class ConnectionActivity extends AppCompatActivity implements SwipeRefres
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
             return true;
         }
 
@@ -120,8 +125,9 @@ public class ConnectionActivity extends AppCompatActivity implements SwipeRefres
     @Override
     protected void onResume() {
         super.onResume();
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
 
-
+        mDebugMode = sharedPref.getBoolean(SettingsActivity.KEY_PREF_DEBUG, false);
     }
 
 
@@ -158,7 +164,7 @@ public class ConnectionActivity extends AppCompatActivity implements SwipeRefres
                     // on the remote device
                     for (ParcelUuid pu : puList) {
                         if (pu.getUuid().compareTo(serv_UUID) == 0) {
-                            Log.e(TAG, "Compatible server found.");
+                          if (mDebugMode) Log.e(TAG, "Compatible server found.");
 
                             //Check if the device is not already present in the list.
                             if (validDevices.indexOf(btDevice) == -1)

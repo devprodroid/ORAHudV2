@@ -5,6 +5,7 @@ import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -12,6 +13,7 @@ import android.hardware.SensorManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -40,6 +42,7 @@ import devprodroid.bluetooth.BTMessage;
 import devprodroid.bluetooth.BTSocketListener;
 import devprodroid.bluetooth.DataModel;
 import devprodroid.orahudserver.R;
+import devprodroid.orahudserver.SettingsActivity;
 import devprodroid.orahudserver.YADroneApplication;
 
 
@@ -105,11 +108,14 @@ public class ControlActivity extends Activity implements SensorEventListener,
      * get drone reference and create DroneControl instance
      */
     private void initDrone() {
+
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean outdoorMode = sharedPref.getBoolean(SettingsActivity.KEY_PREF_OUTDOOR_MODE, false);
+
         mApp = (YADroneApplication) getApplication();
 
         mDrone = mApp.getARDrone();
-
-        mDroneControl = new DroneControl(mDrone);
+        mDroneControl = new DroneControl(mDrone,outdoorMode);
 
         addDroneListeners();
 
@@ -561,6 +567,9 @@ public class ControlActivity extends Activity implements SensorEventListener,
             return true;
         }
     }
+
+
+
 
 
 }

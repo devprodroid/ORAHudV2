@@ -41,13 +41,18 @@ public class DroneControl implements Runnable {
     private static boolean goDownDemand;
 
 
-    public DroneControl(IARDrone aDrone) {
+
+    //Settings
+    private boolean mIndoorMode;
+
+
+    public DroneControl(IARDrone aDrone, boolean outdoorMode) {
         drone = aDrone;
         drone.start();
         cmd = drone.getCommandManager();
         cmd.setNavDataDemo(false);
       //  cmd.setMaxAltitude(3000);
-        cmd.setOutdoor(false, false);
+        cmd.setOutdoor(outdoorMode, outdoorMode);
 
 
         startThread();
@@ -158,18 +163,6 @@ public class DroneControl implements Runnable {
             return true;
         }
 
-
-//        if (getPitch_angleNormed() > 20) {
-//            //back
-//            cmd.up(getPitch_angleControl());
-//            Log.e("Command", "up: " + getPitch_angleControl());
-//            return true;
-//        } else if (getPitch_angleNormed() < -20) {
-//            //forward
-//            cmd.down(getPitch_angleControl());
-//            Log.e("Command", "down: " + getPitch_angleControl());
-//            return true;
-//        }
         return false;
     }
 
@@ -360,5 +353,15 @@ public class DroneControl implements Runnable {
 
     public void setGoDownDemand(boolean goDownDemand) {
         this.goDownDemand = goDownDemand;
+    }
+
+    public boolean ismIndoorMode() {
+
+
+        return mIndoorMode;
+    }
+
+    public void setmIndoorMode(boolean mIndoorMode) {
+        this.mIndoorMode = mIndoorMode;
     }
 }

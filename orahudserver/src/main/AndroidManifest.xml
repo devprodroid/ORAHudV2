@@ -35,7 +35,15 @@
             android:theme="@style/Theme.AppCompat.Light"
 
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:label="@string/title_activity_control"></activity>
-    </application>
+            android:label="@string/title_activity_control"/>
+
+    <activity
+        android:name="SettingsActivity"
+        android:screenOrientation="landscape"
+        android:theme="@style/Theme.AppCompat.Light"
+
+        android:configChanges="keyboardHidden|orientation|screenSize"
+        android:label="@string/title_activity_control"/>
+</application>
 
 </manifest>

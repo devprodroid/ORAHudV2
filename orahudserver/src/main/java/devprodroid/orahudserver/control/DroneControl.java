@@ -50,12 +50,15 @@ public class DroneControl implements Runnable {
         drone = aDrone;
         drone.start();
         cmd = drone.getCommandManager();
-        cmd.setNavDataDemo(false);
-      //  cmd.setMaxAltitude(3000);
-        cmd.setOutdoor(outdoorMode, outdoorMode);
+      //  drone.getCommandManager().setNavDataDemo(false);
+
+
+        //cmd.setOutdoor(outdoorMode, outdoorMode);
+        drone.start();
 
 
         startThread();
+        cmd.setNavDataDemo(false);
     }
 
     /**
@@ -179,7 +182,6 @@ public class DroneControl implements Runnable {
             cmd.goLeft(getRoll_angleControl());
             Log.e("Command", "goLeft: " + getRoll_angleControl());
             return true;
-
         }
         return false;
     }
@@ -279,6 +281,7 @@ public class DroneControl implements Runnable {
     public void takeoff() {
         if (!isFlying()) {
             drone.takeOff();
+            cmd.hover();
             setIsFlying(true);
         }
 
@@ -328,7 +331,7 @@ public class DroneControl implements Runnable {
     }
 
     public boolean isTiltControlActive() {
-        Log.d(TAG, "isTiltControlActive " + Boolean.toString(this.controlActive));
+       // Log.d(TAG, "isTiltControlActive " + Boolean.toString(this.controlActive));
         return this.controlActive;
 
     }

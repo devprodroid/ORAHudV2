@@ -28,6 +28,11 @@ import java.nio.ByteBuffer;
 import java.util.UUID;
 
 import de.yadrone.base.IARDrone;
+import de.yadrone.base.exception.ARDroneException;
+import de.yadrone.base.exception.CommandException;
+import de.yadrone.base.exception.ConfigurationException;
+import de.yadrone.base.exception.IExceptionListener;
+import de.yadrone.base.exception.NavDataException;
 import de.yadrone.base.navdata.AcceleroListener;
 import de.yadrone.base.navdata.AcceleroPhysData;
 import de.yadrone.base.navdata.AcceleroRawData;
@@ -37,6 +42,7 @@ import de.yadrone.base.navdata.AttitudeListener;
 import de.yadrone.base.navdata.BatteryListener;
 import de.yadrone.base.navdata.MagnetoData;
 import de.yadrone.base.navdata.MagnetoListener;
+import de.yadrone.base.navdata.NavDataManager;
 import devprodroid.bluetooth.BTClient;
 import devprodroid.bluetooth.BTMessage;
 import devprodroid.bluetooth.BTSocketListener;
@@ -46,16 +52,21 @@ import devprodroid.orahudserver.SettingsActivity;
 import devprodroid.orahudserver.YADroneApplication;
 
 
+
+
+
+
 /**
  * This Activity displays Control interface and informations for the drone
  */
 public class ControlActivity extends Activity implements SensorEventListener,
         BTSocketListener.Callback, AttitudeListener, AltitudeListener, BatteryListener,
-        AcceleroListener, MagnetoListener {
+        AcceleroListener, MagnetoListener,IExceptionListener {
 
 
     public final static String MSG_BT_UUID = "MSG_BT_UUID";
     public final static String MSG_MAC_BT_DEVICE_ADDRESS = "MSG_MAC_BT_DEVICE_ADDRESS";
+    public final static String MSG_DEBUG_ENABLED = "MSG_DEBUG_ENABLED";
     private final static int INTERVAL = 500;
     private final String TAG = getClass().getPackage().getName();
     private Handler mHandler;
@@ -69,10 +80,16 @@ public class ControlActivity extends Activity implements SensorEventListener,
     private DroneControl mDroneControl;
     private YADroneApplication mApp;
     private IARDrone mDrone;
+    private NavDataManager nav;
     private SensorManager mSensorManager;
     private Sensor mSensor;
     private static TextView tv;
     private boolean mDroneSendRunning = false;
+    private boolean mDebugMode;
+
+
+
+
 
     public static byte[] float2ByteArray(float value) {
         return ByteBuffer.allocate(4).putFloat(value).array();
@@ -86,12 +103,8 @@ public class ControlActivity extends Activity implements SensorEventListener,
         tv = (TextView) findViewById(R.id.tv);
 
         registerSensors();
-        initDrone();
-        // addDroneListeners();
 
         mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_NORMAL);
-        mDroneControl.startThread();
-        mDroneSendRunning = true;
 
         //startHandler();
         initButtons();
@@ -99,10 +112,15 @@ public class ControlActivity extends Activity implements SensorEventListener,
         initDataModel();
 
 
+
+
+        initDrone();
+        // addDroneListeners();
+        Log.d(TAG, "OnStart");
+
         initBluetoothConnection();
 
     }
-
 
     /**
      * get drone reference and create DroneControl instance
@@ -115,9 +133,18 @@ public class ControlActivity extends Activity implements SensorEventListener,
         mApp = (YADroneApplication) getApplication();
 
         mDrone = mApp.getARDrone();
+
+
         mDroneControl = new DroneControl(mDrone,outdoorMode);
+        nav = mDrone.getNavDataManager();
+       // mDrone.getCommandManager().setNavDataDemo(false);
+        mDroneControl.startThread();
+        mDroneSendRunning = true;
 
         addDroneListeners();
+
+
+
 
     }
 
@@ -140,6 +167,7 @@ public class ControlActivity extends Activity implements SensorEventListener,
         Intent act_param = this.getIntent();
         final String macBTDeviceAddress = act_param.getStringExtra(MSG_MAC_BT_DEVICE_ADDRESS);
         final UUID serv_UUID = UUID.fromString(act_param.getStringExtra(MSG_BT_UUID));
+        mDebugMode = act_param.getBooleanExtra(MSG_DEBUG_ENABLED,false);
 
 
         if (true) {
@@ -317,13 +345,13 @@ public class ControlActivity extends Activity implements SensorEventListener,
         super.onResume();
 
         initDrone();
-        // addDroneListeners();
+     //   addDroneListeners();
 
         mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_NORMAL);
         mDroneControl.startThread();
         mDroneSendRunning = true;
         startHandler();
-
+        Log.d(TAG, "OnResume");
 
     }
 
@@ -331,12 +359,17 @@ public class ControlActivity extends Activity implements SensorEventListener,
      * Register for drone listeners
      */
     private void addDroneListeners() {
-        //mDrone.getNavDataManager().
-        mDrone.getNavDataManager().addAttitudeListener(this);
-        mDrone.getNavDataManager().addBatteryListener(this);
-        mDrone.getNavDataManager().addAltitudeListener(this);
-        mDrone.getNavDataManager().addAcceleroListener(this);
-        mDrone.getNavDataManager().addMagnetoListener(this);
+
+        if (mDebugMode) mDrone.addExceptionListener(this);
+
+        nav.addAttitudeListener(this);
+        nav.addBatteryListener(this);
+        nav.addAltitudeListener(this);
+        nav.addAcceleroListener(this);
+        nav.addMagnetoListener(this);
+        Log.d(TAG, "addDroneListeners finished");
+
+
     }
     @Override
     public void onPause() {
@@ -354,13 +387,15 @@ public class ControlActivity extends Activity implements SensorEventListener,
         removeDroneListeners();
 
         mDrone.stop();
+        //mDrone.reset();
+
         Log.d("DebugLand", "onPause");
 
 
         mSensorManager.unregisterListener(this);
 
 
-        //  finish();
+         // this.finish();
 
 
     }
@@ -369,11 +404,13 @@ public class ControlActivity extends Activity implements SensorEventListener,
      * unregister drone listeners
      */
     private void removeDroneListeners() {
-        mDrone.getNavDataManager().removeAttitudeListener(this);
-        mDrone.getNavDataManager().removeBatteryListener(this);
-        mDrone.getNavDataManager().removeAltitudeListener(this);
-        mDrone.getNavDataManager().removeAcceleroListener(this);
-        mDrone.getNavDataManager().removeMagnetoListener(this);
+        mDrone.removeExceptionListener(this);
+        nav.removeAttitudeListener(this);
+        nav.removeBatteryListener(this);
+        nav.removeAltitudeListener(this);
+        nav.removeAcceleroListener(this);
+        nav.removeMagnetoListener(this);
+
     }
 
 
@@ -381,6 +418,7 @@ public class ControlActivity extends Activity implements SensorEventListener,
         mDataModel.setPitch(Math.round(pitch / 1000));
         mDataModel.setRoll(Math.round(roll / 1000));
         mDataModel.setYaw(Math.round(yaw / 1000));
+       // Log.d(TAG, mDataModel.toString());
         //    new SendtoBT().execute();
     }
 
@@ -451,7 +489,7 @@ public class ControlActivity extends Activity implements SensorEventListener,
         mDataModel.setAccZ(zVel);
 
         mDataModel.setAltitude(altitude.getRef());
-
+        Log.d("ALTITUDE", Integer.toString(altitude.getRef()));
 
     }
 
@@ -459,6 +497,8 @@ public class ControlActivity extends Activity implements SensorEventListener,
     public void batteryLevelChanged(int batteryLevel) {
         mDataModel.setBatteryLevel(batteryLevel);
         //  Log.d(TAG, "AR.Drone Battery: " + batteryLevel);
+
+
     }
 
     @Override
@@ -497,6 +537,7 @@ public class ControlActivity extends Activity implements SensorEventListener,
 
     }
 
+
     public void startHandler() {
 
 
@@ -525,9 +566,31 @@ public class ControlActivity extends Activity implements SensorEventListener,
                         }
                     }
                if (mDroneSendRunning)
-                   mHandler.postDelayed(this, 50);
+                   mHandler.postDelayed(this, 20);
             }
-        }, 50);
+        }, 20);
+
+    }
+
+    @Override
+    public void exeptionOccurred(ARDroneException exc) {
+
+
+
+        if (exc instanceof ConfigurationException)
+        {
+            Log.e(TAG,exc.getMessage());
+        }
+        else if (exc instanceof CommandException)
+        {
+            Log.e(TAG,exc.getMessage());
+        }
+        else if (exc instanceof NavDataException) {
+            Log.e(TAG,exc.getMessage());
+        }
+
+
+
 
     }
 

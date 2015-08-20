@@ -128,6 +128,8 @@ public class ConnectionActivity extends AppCompatActivity implements SwipeRefres
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
 
         mDebugMode = sharedPref.getBoolean(SettingsActivity.KEY_PREF_DEBUG, false);
+
+
     }
 
 
@@ -151,7 +153,7 @@ public class ConnectionActivity extends AppCompatActivity implements SwipeRefres
                             .getParcelable(BluetoothDevice.EXTRA_DEVICE);
 
                     if (btDevice != null) {
-                        Log.e(TAG, "ACTION_UUID event received. Searching through available UUID on "
+                        Log.d(TAG, "ACTION_UUID event received. Searching through available UUID on "
                                 + btDevice.getAddress());
                     }
 
@@ -164,7 +166,7 @@ public class ConnectionActivity extends AppCompatActivity implements SwipeRefres
                     // on the remote device
                     for (ParcelUuid pu : puList) {
                         if (pu.getUuid().compareTo(serv_UUID) == 0) {
-                          if (mDebugMode) Log.e(TAG, "Compatible server found.");
+                          if (mDebugMode) Log.d(TAG, "Compatible server found.");
 
                             //Check if the device is not already present in the list.
                             if (validDevices.indexOf(btDevice) == -1)
@@ -176,7 +178,7 @@ public class ConnectionActivity extends AppCompatActivity implements SwipeRefres
 
                     //Refresh the GUI
                     if (validDevices.size() == 0) {
-                        Log.e(TAG, "No compatible devices found.");
+                        Log.d(TAG, "No compatible devices found.");
                         devListView.setClickable(false);
                         String[] noDeviceFound = {"Please pair your device with ORA Glasses before using ORA connect"};
                         devListView.setAdapter(new ArrayAdapter<String>(ConnectionActivity.this,
@@ -206,6 +208,7 @@ public class ConnectionActivity extends AppCompatActivity implements SwipeRefres
 
                                 intent.putExtra(ControlActivity.MSG_BT_UUID, ConnectionActivity.serv_UUID.toString());
                                 intent.putExtra(ControlActivity.MSG_MAC_BT_DEVICE_ADDRESS, btDevice.getAddress());
+                                intent.putExtra(ControlActivity.MSG_DEBUG_ENABLED,mDebugMode);
 
                                 startActivity(intent);
                             }
@@ -249,7 +252,7 @@ public class ConnectionActivity extends AppCompatActivity implements SwipeRefres
             validDevices.clear();
 
             if (mBluetoothAdapter == null)
-                Log.e("BTDeviceDiscover", "No bluetooth adapter detected/available.");
+                Log.d("BTDeviceDiscover", "No bluetooth adapter detected/available.");
 
             //Get the list of paired devices.
             Set<BluetoothDevice> devList = null;
@@ -263,7 +266,7 @@ public class ConnectionActivity extends AppCompatActivity implements SwipeRefres
                     Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                     startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
 
-                    Log.e("BTDeviceDiscover", "Bluetooth is DISABLED. Asking the user");
+                    Log.d("BTDeviceDiscover", "Bluetooth is DISABLED. Asking the user");
                     return;
                 }
             }
@@ -271,7 +274,7 @@ public class ConnectionActivity extends AppCompatActivity implements SwipeRefres
             if (devList != null) {
                 for (BluetoothDevice btDevice : devList) {
                     //Refresh the list of UUID on the remote device. !!!!ASYNCHRONE
-                    Log.e(TAG, "READING FROM " + btDevice.getAddress());
+                    Log.d(TAG, "READING FROM " + btDevice.getAddress());
                     btDevice.fetchUuidsWithSdp();
                 }
             }

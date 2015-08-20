@@ -40,9 +40,12 @@ import de.yadrone.base.navdata.Altitude;
 import de.yadrone.base.navdata.AltitudeListener;
 import de.yadrone.base.navdata.AttitudeListener;
 import de.yadrone.base.navdata.BatteryListener;
+import de.yadrone.base.navdata.ControlState;
+import de.yadrone.base.navdata.DroneState;
 import de.yadrone.base.navdata.MagnetoData;
 import de.yadrone.base.navdata.MagnetoListener;
 import de.yadrone.base.navdata.NavDataManager;
+import de.yadrone.base.navdata.StateListener;
 import devprodroid.bluetooth.BTClient;
 import devprodroid.bluetooth.BTMessage;
 import devprodroid.bluetooth.BTSocketListener;
@@ -61,7 +64,7 @@ import devprodroid.orahudserver.YADroneApplication;
  */
 public class ControlActivity extends Activity implements SensorEventListener,
         BTSocketListener.Callback, AttitudeListener, AltitudeListener, BatteryListener,
-        AcceleroListener, MagnetoListener,IExceptionListener {
+        AcceleroListener, MagnetoListener,IExceptionListener,StateListener {
 
 
     public final static String MSG_BT_UUID = "MSG_BT_UUID";
@@ -367,6 +370,7 @@ public class ControlActivity extends Activity implements SensorEventListener,
         nav.addAltitudeListener(this);
         nav.addAcceleroListener(this);
         nav.addMagnetoListener(this);
+        nav.addStateListener(this);
         Log.d(TAG, "addDroneListeners finished");
 
 
@@ -410,6 +414,7 @@ public class ControlActivity extends Activity implements SensorEventListener,
         nav.removeAltitudeListener(this);
         nav.removeAcceleroListener(this);
         nav.removeMagnetoListener(this);
+        nav.removeStateListener(this);
 
     }
 
@@ -428,6 +433,8 @@ public class ControlActivity extends Activity implements SensorEventListener,
     public void windCompensation(float pitch, float roll) {
         mDataModel.setPitchCompensation(Math.round(pitch / 1000));
         mDataModel.setRollCompensation(Math.round(roll / 1000));
+
+
     }
 
 
@@ -489,7 +496,7 @@ public class ControlActivity extends Activity implements SensorEventListener,
         mDataModel.setAccZ(zVel);
 
         mDataModel.setAltitude(altitude.getRef());
-        Log.d("ALTITUDE", Integer.toString(altitude.getRef()));
+       // Log.d("ALTITUDE", Integer.toString(altitude.getRef()));
 
     }
 
@@ -591,6 +598,28 @@ public class ControlActivity extends Activity implements SensorEventListener,
 
 
 
+
+    }
+
+    @Override
+    public void stateChanged(DroneState droneState) {
+
+           mDataModel.setIsFlying(droneState.isFlying());
+           mDroneControl.setIsFlying(droneState.isFlying());
+
+
+
+
+        if (droneState.isBatteryTooLow())
+            Log.d("DroneState", "isBatteryTooLow True");
+        if (droneState.isTooMuchWind())
+            Log.d("DroneState", "isTooMuchWind True");
+
+
+    }
+
+    @Override
+    public void controlStateChanged(ControlState controlState) {
 
     }
 

@@ -19,6 +19,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
+import java.text.DecimalFormat;
 import java.util.UUID;
 
 import devprodroid.bluetooth.BTServerService;
@@ -296,7 +297,9 @@ public class HUDActivity extends Activity {
 
         //HUD Values
         tvBattery.setText(getString(R.string.lblBatt)+ dataModel.getBatteryLevel()+"%" );
-        tvAltitude.setText(getString(R.string.lblAlt)+ dataModel.getAltitude()+"m" );
+        tvAltitude.setText(getString(R.string.lblAlt) + new DecimalFormat("#.##").format(dataModel.getAltitudeM()) + "m");
+
+
 
         final TextView tvText = (TextView) findViewById(R.id.tv2);
         tvText.setText(getString(R.string.lblYaw) + dataModel.getYaw().toString());

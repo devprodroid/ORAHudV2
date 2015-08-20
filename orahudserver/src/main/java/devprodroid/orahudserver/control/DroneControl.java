@@ -291,11 +291,11 @@ public class DroneControl implements Runnable {
      * land and set isFlying false
      */
     public void land() {
-        if (isFlying()) {
+       // if (isFlying()) {
             drone.landing();
             setIsFlying(false);
             Log.d("DebugLand", "DebugLand");
-        }
+        //}
     }
 
     /**

@@ -33,6 +33,16 @@ public class DataModel {
 
     private Integer accZ=0;
 
+    public Boolean getIsFlying() {
+        return isFlying;
+    }
+
+    public void setIsFlying(Boolean isFlying) {
+        this.isFlying = isFlying;
+    }
+
+    private Boolean isFlying=false;
+
 
 
 
@@ -145,6 +155,7 @@ public class DataModel {
 
         FlightData[6] = batteryLevel;
         FlightData[7] = accZ;
+        FlightData[8] = (isFlying)? 1 : 0;
 
 
     }
@@ -165,6 +176,7 @@ public class DataModel {
 
             batteryLevel = FlightData[6];
             accZ = FlightData[7];
+            isFlying = (FlightData[8]==1);
         }
     }
 
@@ -224,6 +236,10 @@ public class DataModel {
 
     public Integer getAltitude() {
         return altitude;
+    }
+
+    public float getAltitudeM() {
+        return altitude/10;
     }
 
 

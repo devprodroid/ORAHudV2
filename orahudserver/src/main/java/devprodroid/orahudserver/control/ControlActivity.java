@@ -24,7 +24,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.UUID;
 
 import de.yadrone.base.IARDrone;
@@ -92,12 +91,6 @@ public class ControlActivity extends Activity implements SensorEventListener,
 
 
 
-
-
-    public static byte[] float2ByteArray(float value) {
-        return ByteBuffer.allocate(4).putFloat(value).array();
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -145,6 +138,7 @@ public class ControlActivity extends Activity implements SensorEventListener,
         mDroneSendRunning = true;
 
         addDroneListeners();
+        Log.d(TAG, "AddDroneListeners");
 
 
 
@@ -288,8 +282,10 @@ public class ControlActivity extends Activity implements SensorEventListener,
                     mDroneControl.setGoUpDemand(true);
 
 
+
                 } else if (event.getAction() == MotionEvent.ACTION_UP) {
                     mDroneControl.setGoUpDemand(false);
+                    mDroneControl.hover();
 
 
                 }
@@ -306,6 +302,7 @@ public class ControlActivity extends Activity implements SensorEventListener,
 
                 } else if (event.getAction() == MotionEvent.ACTION_UP) {
                     mDroneControl.setGoDownDemand(false);
+                    mDroneControl.hover();
 
                 }
 
@@ -348,7 +345,7 @@ public class ControlActivity extends Activity implements SensorEventListener,
         super.onResume();
 
         initDrone();
-     //   addDroneListeners();
+      //  addDroneListeners();
 
         mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_NORMAL);
         mDroneControl.startThread();
@@ -423,7 +420,7 @@ public class ControlActivity extends Activity implements SensorEventListener,
         mDataModel.setPitch(Math.round(pitch / 1000));
         mDataModel.setRoll(Math.round(roll / 1000));
         mDataModel.setYaw(Math.round(yaw / 1000));
-       // Log.d(TAG, mDataModel.toString());
+        //Log.d(TAG, mDataModel.toString());
         //    new SendtoBT().execute();
     }
 
@@ -496,7 +493,7 @@ public class ControlActivity extends Activity implements SensorEventListener,
         mDataModel.setAccZ(zVel);
 
         mDataModel.setAltitude(altitude.getRef());
-       // Log.d("ALTITUDE", Integer.toString(altitude.getRef()));
+      //  Log.d("ALTITUDE", Integer.toString(altitude.getRef()));
 
     }
 
@@ -547,7 +544,7 @@ public class ControlActivity extends Activity implements SensorEventListener,
 
     public void startHandler() {
 
-
+;
         mHandler = new Handler();
 
         mHandler.postDelayed(new Runnable() {
@@ -595,23 +592,18 @@ public class ControlActivity extends Activity implements SensorEventListener,
         else if (exc instanceof NavDataException) {
             Log.e(TAG,exc.getMessage());
         }
-
-
-
-
     }
 
     @Override
     public void stateChanged(DroneState droneState) {
 
-           mDataModel.setIsFlying(droneState.isFlying());
-           mDroneControl.setIsFlying(droneState.isFlying());
+        mDataModel.setIsFlying(droneState.isFlying());
+        mDroneControl.setIsFlying(droneState.isFlying());
+
+        mDataModel.setBatteryTooLow(droneState.isBatteryTooLow());
 
 
 
-
-        if (droneState.isBatteryTooLow())
-            Log.d("DroneState", "isBatteryTooLow True");
         if (droneState.isTooMuchWind())
             Log.d("DroneState", "isTooMuchWind True");
 
@@ -640,12 +632,6 @@ public class ControlActivity extends Activity implements SensorEventListener,
 
                         mBTClient.sendMessage(msg);
 
-
-                        //mDataModel.setFlightData(mDataModel.getFlightDataByteArray());
-
-                        // Log.d(TAG, "Send Payload" + mDataModel.toString());
-
-
                     }
 
 
@@ -665,4 +651,5 @@ public class ControlActivity extends Activity implements SensorEventListener,
 
 
 }
+
 

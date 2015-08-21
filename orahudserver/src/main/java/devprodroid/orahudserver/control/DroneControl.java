@@ -106,22 +106,32 @@ public class DroneControl implements Runnable {
                 performAction = false;
                 if (isFlying()) {
 
-                    if ((isTranslateMode()) && (isTiltControlActive())) {
-                        //Pitch movement
-                        performAction = pitchUpDown();
+//                    if ((isTranslateMode()) && (isTiltControlActive())) {
+//                        //Pitch movement
+//                        performAction = pitchUpDown();
+//
+//                        //Roll Movement
+//                        performAction = rollLeftRight() || performAction;
+//                    } else if ((isRotateMode()) && (isTiltControlActive())) {
+//                        //Pitch movement
+//                        performAction = pitchUpDown();
+//
+//                        //Roll Movement
+//                        performAction = spinLeftRight() || performAction;
+//                    }
 
-                        //Roll Movement
-                        performAction = rollLeftRight() || performAction;
-                    } else if ((isRotateMode()) && (isTiltControlActive())) {
-                        //Pitch movement
-                        performAction = pitchUpDown();
 
-                        //Roll Movement
-                        performAction = spinLeftRight() || performAction;
-                    }
+
+                   // move(int speedX, int speedY, int speedZ, int speedSpin)
+                    if (isTiltControlActive())
+                        if (isTranslateMode())
+                            cmd.move(-getPitch_angleNormed(),-getRoll_angleNormed(),0,0);
+                        else
+                        if (isRotateMode())
+                            cmd.move(-getPitch_angleNormed(),0,0,-getRoll_angleNormed());
 
                     //UpDown Movement
-                    performAction = goUpDown() || performAction;
+                     goUpDown() ;
                     //We sleep for 20ms for performance reasons
                 }
                 sleep(sleepDuration);
@@ -130,7 +140,7 @@ public class DroneControl implements Runnable {
                 //unexpected happens
                 if (isFlying()) {
                     cmd.landing();
-                    Log.d("DebugLand", "DebugLand");
+                    Log.d("DebugLandelse", "DebugLand");
                     setIsFlying(false);
                     sleep(sleepDuration);
                 }
@@ -158,11 +168,11 @@ public class DroneControl implements Runnable {
     private boolean goUpDown() {
 
         if (isGoUpDemand()) {
-            cmd.up(20);
+            cmd.up(40);
             return true;
         } else if (isGoDownDemand()) {
 
-            cmd.down(20);
+            cmd.down(40);
             return true;
         }
 
@@ -221,7 +231,9 @@ public class DroneControl implements Runnable {
      * @return The pitch angle multiplied by 10 and rounded to int
      */
     public int getPitch_angleNormed() {
-        return Math.round(pitch_angle * 10);
+        if (Math.abs(pitch_angle)>=0.05)
+            return Math.round(pitch_angle * 10);
+        else return 0;
     }
 
     /**
@@ -247,7 +259,9 @@ public class DroneControl implements Runnable {
      * @return The roll angle multiplied by 10 and rounded to int
      */
     public int getRoll_angleNormed() {
-        return Math.round(roll_angle * 10);
+        if (Math.abs(roll_angle)>=0.05)
+            return Math.round(roll_angle * 10);
+        else return 0;
     }
 
 
@@ -283,6 +297,8 @@ public class DroneControl implements Runnable {
             drone.takeOff();
             cmd.hover();
             setIsFlying(true);
+
+
         }
 
     }
@@ -291,7 +307,7 @@ public class DroneControl implements Runnable {
      * land and set isFlying false
      */
     public void land() {
-       // if (isFlying()) {
+        //if (isFlying()) {
             drone.landing();
             setIsFlying(false);
             Log.d("DebugLand", "DebugLand");

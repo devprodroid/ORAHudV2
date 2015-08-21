@@ -43,6 +43,16 @@ public class DataModel {
 
     private Boolean isFlying=false;
 
+    public Boolean getBatteryTooLow() {
+        return BatteryTooLow=false;
+    }
+
+    public void setBatteryTooLow(Boolean batteryTooLow) {
+        BatteryTooLow = batteryTooLow;
+    }
+
+    private Boolean BatteryTooLow;
+
 
 
 
@@ -52,32 +62,6 @@ public class DataModel {
         linkValuesToArrayIndices();
 
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     /**
@@ -156,7 +140,7 @@ public class DataModel {
         FlightData[6] = batteryLevel;
         FlightData[7] = accZ;
         FlightData[8] = (isFlying)? 1 : 0;
-
+        FlightData[9] = (BatteryTooLow)? 1 : 0;
 
     }
 
@@ -177,6 +161,7 @@ public class DataModel {
             batteryLevel = FlightData[6];
             accZ = FlightData[7];
             isFlying = (FlightData[8]==1);
+            BatteryTooLow = (FlightData[9]==1);
         }
     }
 
@@ -239,7 +224,7 @@ public class DataModel {
     }
 
     public float getAltitudeM() {
-        return altitude/10;
+        return altitude / 1000f;
     }
 
 

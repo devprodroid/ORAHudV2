@@ -2,33 +2,48 @@
     android:id="@+id/hudBase"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:orientation="horizontal">
+    android:orientation="horizontal"
+    android:baselineAligned="false">
 
 
     <RelativeLayout
+        android:id="@+id/hud_1"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:id="@+id/hud_1"
         android:layout_weight="0.2"></RelativeLayout>
 
-    <LinearLayout
-        android:orientation="vertical"
+
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="0.8">
+        android:layout_weight="0.75"
+        android:orientation="vertical">
 
         <TextView
-            android:layout_width="wrap_content"
+            android:id="@+id/tvBattery"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="2dip"
+            android:layout_marginTop="2dip"
+            android:background="@drawable/lblbackborder"
+
+            android:padding="2dp"
+            android:text="Batt: -%"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:text="Batt: 90%"
-            android:id="@+id/tvBattery" />
+            android:textColor="#00ff00" />
+
+
         <TextView
-            android:layout_width="wrap_content"
+            android:id="@+id/tvAltitude"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/lblbackborder"
+            android:padding="2dp"
+            android:text="Alt: -m"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:text="Alt: 1,5m"
-            android:id="@+id/tvAltitude" />
-    </LinearLayout>
+            android:textColor="#00ff00" />
+    </RelativeLayout>
 
 </LinearLayout>

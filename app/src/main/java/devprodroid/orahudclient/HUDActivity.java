@@ -19,7 +19,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
-import java.text.DecimalFormat;
 import java.util.UUID;
 
 import devprodroid.bluetooth.BTServerService;
@@ -268,6 +267,7 @@ public class HUDActivity extends Activity {
 
         glSurfaceView.onResume();
         glSurfaceView.requestRender();
+
     }
 
     @Override
@@ -295,9 +295,11 @@ public class HUDActivity extends Activity {
         // Update UI Elements
 
 
-        //HUD Values
+        //fixed HUD Values
         tvBattery.setText(getString(R.string.lblBatt)+ dataModel.getBatteryLevel()+"%" );
-        tvAltitude.setText(getString(R.string.lblAlt) + new DecimalFormat("#.##").format(dataModel.getAltitudeM()) + "m");
+        tvAltitude.setText(getString(R.string.lblAlt) + String.format("%.1f", dataModel.getAltitudeM())+ "m");
+       // Log.d("ALT", Integer.toString(dataModel.getAltitude()));
+
 
 
 

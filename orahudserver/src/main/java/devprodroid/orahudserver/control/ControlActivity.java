@@ -27,11 +27,11 @@ import java.io.IOException;
 import java.util.UUID;
 
 import de.yadrone.base.IARDrone;
-import de.yadrone.base.exception.ARDroneException;
-import de.yadrone.base.exception.CommandException;
-import de.yadrone.base.exception.ConfigurationException;
-import de.yadrone.base.exception.IExceptionListener;
-import de.yadrone.base.exception.NavDataException;
+//import de.yadrone.base.exception.ARDroneException;
+//import de.yadrone.base.exception.CommandException;
+//import de.yadrone.base.exception.ConfigurationException;
+//import de.yadrone.base.exception.IExceptionListener;
+//import de.yadrone.base.exception.NavDataException;
 import de.yadrone.base.navdata.AcceleroListener;
 import de.yadrone.base.navdata.AcceleroPhysData;
 import de.yadrone.base.navdata.AcceleroRawData;
@@ -63,7 +63,7 @@ import devprodroid.orahudserver.YADroneApplication;
  */
 public class ControlActivity extends Activity implements SensorEventListener,
         BTSocketListener.Callback, AttitudeListener, AltitudeListener, BatteryListener,
-        AcceleroListener, MagnetoListener,IExceptionListener,StateListener {
+        AcceleroListener, MagnetoListener,StateListener {
 
 
     public final static String MSG_BT_UUID = "MSG_BT_UUID";
@@ -88,6 +88,7 @@ public class ControlActivity extends Activity implements SensorEventListener,
     private static TextView tv;
     private boolean mDroneSendRunning = false;
     private boolean mDebugMode;
+    private boolean magnetoMode;
 
 
 
@@ -125,6 +126,8 @@ public class ControlActivity extends Activity implements SensorEventListener,
 
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         boolean outdoorMode = sharedPref.getBoolean(SettingsActivity.KEY_PREF_OUTDOOR_MODE, false);
+
+        magnetoMode = sharedPref.getBoolean(SettingsActivity.KEY_PREF_MAGNETO_MODE, false);
 
         mApp = (YADroneApplication) getApplication();
 
@@ -360,13 +363,14 @@ public class ControlActivity extends Activity implements SensorEventListener,
      */
     private void addDroneListeners() {
 
-        if (mDebugMode) mDrone.addExceptionListener(this);
+      //  mDrone.addExceptionListener(this);
 
         nav.addAttitudeListener(this);
         nav.addBatteryListener(this);
         nav.addAltitudeListener(this);
         nav.addAcceleroListener(this);
-        nav.addMagnetoListener(this);
+        if (magnetoMode) nav.addMagnetoListener(this);
+
         nav.addStateListener(this);
         Log.d(TAG, "addDroneListeners finished");
 
@@ -405,12 +409,12 @@ public class ControlActivity extends Activity implements SensorEventListener,
      * unregister drone listeners
      */
     private void removeDroneListeners() {
-        mDrone.removeExceptionListener(this);
+        //mDrone.removeExceptionListener(this);
         nav.removeAttitudeListener(this);
         nav.removeBatteryListener(this);
         nav.removeAltitudeListener(this);
         nav.removeAcceleroListener(this);
-        nav.removeMagnetoListener(this);
+        if (magnetoMode) nav.removeMagnetoListener(this);
         nav.removeStateListener(this);
 
     }
@@ -419,9 +423,8 @@ public class ControlActivity extends Activity implements SensorEventListener,
     public void attitudeUpdated(final float pitch, final float roll, final float yaw) {
         mDataModel.setPitch(Math.round(pitch / 1000));
         mDataModel.setRoll(Math.round(roll / 1000));
-        mDataModel.setYaw(Math.round(yaw / 1000));
-        //Log.d(TAG, mDataModel.toString());
-        //    new SendtoBT().execute();
+        if (!magnetoMode) mDataModel.setYaw(convertHeading(yaw / 1000));
+
     }
 
     public void attitudeUpdated(float arg0, float arg1) {
@@ -539,8 +542,18 @@ public class ControlActivity extends Activity implements SensorEventListener,
     public void received(MagnetoData magnetoData) {
 
 
+        if (magnetoMode)
+            mDataModel.setYaw(convertHeading(magnetoData.getHeadingFusionUnwrapped()));
+
     }
 
+    private int convertHeading(Float heading_Raw) {
+        int heading = Math.round(heading_Raw);
+
+        if (heading < 0) heading = heading + 360;
+
+        return heading;
+    }
 
     public void startHandler() {
 
@@ -576,23 +589,23 @@ public class ControlActivity extends Activity implements SensorEventListener,
 
     }
 
-    @Override
-    public void exeptionOccurred(ARDroneException exc) {
-
-
-
-        if (exc instanceof ConfigurationException)
-        {
-            Log.e(TAG,exc.getMessage());
-        }
-        else if (exc instanceof CommandException)
-        {
-            Log.e(TAG,exc.getMessage());
-        }
-        else if (exc instanceof NavDataException) {
-            Log.e(TAG,exc.getMessage());
-        }
-    }
+//    @Override
+//    public void exeptionOccurred(ARDroneException exc) {
+//
+//
+//
+//        if (exc instanceof ConfigurationException)
+//        {
+//            Log.e(TAG,exc.getMessage());
+//        }
+//        else if (exc instanceof CommandException)
+//        {
+//            Log.e(TAG,exc.getMessage());
+//        }
+//        else if (exc instanceof NavDataException) {
+//            Log.e(TAG,exc.getMessage());
+//        }
+//    }
 
     @Override
     public void stateChanged(DroneState droneState) {
@@ -601,6 +614,7 @@ public class ControlActivity extends Activity implements SensorEventListener,
         mDroneControl.setIsFlying(droneState.isFlying());
 
         mDataModel.setBatteryTooLow(droneState.isBatteryTooLow());
+
 
 
 

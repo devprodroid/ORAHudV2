@@ -7,7 +7,7 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
-public class Attitude {
+public class Compass {
 
     private FloatBuffer vertexBuffer;
     private ShortBuffer drawListBuffer;
@@ -31,26 +31,19 @@ public class Attitude {
                     "void main() {" +
                     "  gl_FragColor = vColor;" +
                     "}";
-
-
-
-
-
-
-
-
-
-
-
-
-
     // number of coordinates per vertex in this array
     static final int COORDS_PER_VERTEX = 3;
     static float squareCoords[] = {
-            -0.5f, 0.015f, 0.0f,   // top left
-            -0.5f, -0.015f, 0.0f,   // bottom left
-            0.5f, -0.015f, 0.0f,   // bottom right
-            0.5f, 0.015f, 0.0f}; // top right
+            0.0f, 0.9f, 0.0f,   //
+            -0.05f, 0.7f, 0.0f,   // Top Right
+            0.05f, 0.7f, 0.0f,   // Top Left
+            0.0f, 0.9f, 0.0f}; //
+
+//    static float squareCoords[] = {
+//            -0.5f, 0.01f, 0.0f,   // top left
+//            -0.5f, -0.01f, 0.0f,   // bottom left
+//            0.5f, -0.01f, 0.0f,   // bottom right
+//            0.5f, 0.01f, 0.0f}; // top right
 
     private short drawOrder[] = {0, 1, 2, 0, 2, 3}; // order to draw vertices
     private int mPositionHandle;
@@ -59,12 +52,12 @@ public class Attitude {
 
     private final int mProgram;
     // Set color with red, green, blue and alpha (opacity) values
-    float color[] = {0f, 1f, 0f, 1.0f};
+    float color[] = {1f, 1f, 0f, 1.0f};
     private final int vertexCount = squareCoords.length / COORDS_PER_VERTEX;
     private final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
 
 
-    public Attitude() {
+    public Compass() {
         // initialize vertex byte buffer for shape coordinates
         ByteBuffer bb = ByteBuffer.allocateDirect(
                 // (# of coordinate values * 4 bytes per float)

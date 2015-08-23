@@ -20,6 +20,8 @@ public class GLRenderer implements GLSurfaceView.Renderer {
     private DownArrow mDownArrow;
     private Attitude mAttitude;
 
+    private Compass mCompass;
+
     private Battery mBattery;
 
     private Line vertLine1;
@@ -36,6 +38,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
     private final float[] mProjectionMatrix = new float[16];
     private final float[] mViewMatrix = new float[16];
     private final float[] mRotationMatrix = new float[16];
+    private final float[] mRotationMatrixCompass = new float[16];
     private final float[] mTranslationMatrix = new float[16];
     private final float[] mBatteryScaleMatrix = new float[16];
 
@@ -68,6 +71,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 
         mAttitude = new Attitude(); //attitude
+        mCompass = new Compass();   //Compass Image
 
         mHorizon = new Horizon(); //Artificial horizon
 
@@ -127,7 +131,10 @@ public class GLRenderer implements GLSurfaceView.Renderer {
         // getModelValues();
         float mAngleNew = mDataModel.getRoll().floatValue();
         float mPitchNew = (float) Math.sin(mDataModel.getPitch().doubleValue() * Math.PI / 90.0);
+        float mHeading = mDataModel.getYaw().floatValue();
+
         int mBatteryLevelNew = mDataModel.getBatteryLevel();
+      //  Log.d("Pitch", Double.toString(mDataModel.getPitch().doubleValue()));
 
         UpActive = false;
         DownActive = false;
@@ -160,13 +167,18 @@ public class GLRenderer implements GLSurfaceView.Renderer {
         // Calculate the projection and view transformation
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
 
-        //Set Rotation for attitude Marker
-        Matrix.setRotateM(mRotationMatrix, 0, mAngle, 0, 0, 1.0f);
+
+
+        Matrix.setRotateM(mRotationMatrixCompass, 0, mAngle, 0, 0, 1.0f);
 
         //Set Translation for attitude Marker
         Matrix.setIdentityM(transMatrix, 0);
         Matrix.translateM(transMatrix, 0, 0f, mPitch, 0);
-        Matrix.multiplyMM(transMatrix, 0, mRotationMatrix, 0, transMatrix, 0);
+
+        //Set Rotation for attitude Marker
+        Matrix.setRotateM(mRotationMatrix, 0, mAngle, 0, 0, 1.0f);
+
+        Matrix.multiplyMM(transMatrix, 0,transMatrix , 0,mRotationMatrix , 0);
 
         // Combine the rotation matrix with the projection and camera view
         Matrix.multiplyMM(scratch, 0, mMVPMatrix, 0, transMatrix, 0);
@@ -191,6 +203,13 @@ public class GLRenderer implements GLSurfaceView.Renderer {
         vertLine2.draw(mMVPMatrix);
         vertLine3.draw(mMVPMatrix);
         vertLine4.draw(mMVPMatrix);
+
+
+        Matrix.setRotateM(mRotationMatrixCompass, 0, mHeading, 0, 0, 1.0f);
+        Matrix.multiplyMM(scratch, 0, mMVPMatrix, 0, mRotationMatrixCompass, 0);
+        mCompass.draw(scratch);
+
+
     }
 
     public void onSurfaceChanged(GL10 unused, int width, int height) {

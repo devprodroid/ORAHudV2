@@ -1,5 +1,8 @@
 package devprodroid.orahudclient;
 
+import android.animation.ArgbEvaluator;
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.bluetooth.BluetoothAdapter;
@@ -7,6 +10,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.util.Log;
@@ -46,6 +50,7 @@ public class HUDActivity extends Activity {
 
     private TextView tvBattery;
     private TextView tvAltitude;
+    private TextView tvYaw;
 
     /**
      * Whether or not the system UI should be auto-hidden after
@@ -81,6 +86,8 @@ public class HUDActivity extends Activity {
     public DataModel dataModel;
 
     Intent serviceIntent;
+
+    ValueAnimator colorAnim;
 
     public HUDActivity() {
         dataModel = new DataModel();
@@ -126,6 +133,19 @@ public class HUDActivity extends Activity {
 
         tvBattery = (TextView) findViewById(R.id.tvBattery);
         tvAltitude = (TextView) findViewById(R.id.tvAltitude);
+        tvYaw = (TextView) findViewById(R.id.tvYaw);
+
+
+
+
+
+        colorAnim = ObjectAnimator.ofInt(tvBattery, "backgroundColor", Color.RED
+                , Color.BLACK);
+        colorAnim.setDuration(500);
+        colorAnim.setEvaluator(new ArgbEvaluator());
+        colorAnim.setRepeatCount(ValueAnimator.INFINITE);
+        colorAnim.setRepeatMode(ValueAnimator.REVERSE);
+
     }
 
 
@@ -192,6 +212,7 @@ public class HUDActivity extends Activity {
 
                     // Display next screen.
                     viewFlipper.showNext();
+
                 }
 
                 // Handling right to left screen swap.
@@ -239,10 +260,6 @@ public class HUDActivity extends Activity {
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
 
-        // Trigger the initial hide() shortly after the activity has been
-        // created, to briefly hint to the user that UI controls
-        // are available.
-        //delayedHide(100);
     }
 
     /**
@@ -296,16 +313,23 @@ public class HUDActivity extends Activity {
 
 
         //fixed HUD Values
-        tvBattery.setText(getString(R.string.lblBatt)+ dataModel.getBatteryLevel()+"%" );
+
+        if (!dataModel.getBatteryTooLow()) {
+            tvBattery.setTextColor(Color.GREEN);
+            tvBattery.setText(getString(R.string.lblBatt) + dataModel.getBatteryLevel() + "%");
+            colorAnim.cancel();
+        }
+        else {
+            tvBattery.setText(getString(R.string.lblBattLow));
+            colorAnim.start();
+
+            //tvBattery.setTextColor(Color.RED);
+        }
         tvAltitude.setText(getString(R.string.lblAlt) + String.format("%.1f", dataModel.getAltitudeM())+ "m");
        // Log.d("ALT", Integer.toString(dataModel.getAltitude()));
+        tvYaw.setText("HDG: " + dataModel.getYaw() + "°");
 
 
-
-
-        final TextView tvText = (TextView) findViewById(R.id.tv2);
-        tvText.setText(getString(R.string.lblYaw) + dataModel.getYaw().toString());
-        //glSurfaceView.requestRender();
 
     }
 

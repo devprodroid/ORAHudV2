@@ -44,6 +44,19 @@
             android:text="Alt: -m"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textColor="#00ff00" />
+
+        <TextView
+            android:id="@+id/tvYaw"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/lblbackborder"
+
+            android:padding="2dp"
+            android:text="Yaw: 180"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="#00ff00"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentStart="true" />
     </RelativeLayout>
 
 </LinearLayout>

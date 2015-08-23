@@ -10,5 +10,10 @@
         android:title="@string/prefOutdoorTitle"
         android:summary="@string/prefOutdoorSummary"
         android:defaultValue="true" />
+    <CheckBoxPreference
+        android:key="pref_Magneto"
+        android:title="@string/prefMagnetoTitle"
+        android:summary="@string/prefMagnetoSummary"
+        android:defaultValue="false" />
 
 </PreferenceScreen>

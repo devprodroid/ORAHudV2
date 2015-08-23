@@ -9,5 +9,7 @@
     <string name="prefDebugTitle">Debug Mode</string>
     <string name="prefOutdoorTitle">Outdoor Flight</string>
     <string name="prefOutdoorSummary">Configure Drone to Outdoor Flight</string>
+    <string name="prefMagnetoSummary">Use Magnetometer Data for Yaw</string>
+    <string name="prefMagnetoTitle">Use Magnetometer</string>
 
 </resources>

@@ -21,6 +21,14 @@ public class GLRenderer implements GLSurfaceView.Renderer {
     private Attitude mAttitude;
 
     private Battery mBattery;
+
+    private Line vertLine1;
+    private Line vertLine2;
+    private Line vertLine3;
+    private Line vertLine4;
+
+
+
     private static final String TAG = "MyGLRenderer";
 
     // mMVPMatrix is an abbreviation for "Model View Projection Matrix"
@@ -66,6 +74,42 @@ public class GLRenderer implements GLSurfaceView.Renderer {
         mUpArrow = new UpArrow();
         mDownArrow = new DownArrow();
         mBattery = new Battery(); //batterystatus
+
+        //-5 deg
+                                   // x y z x y z x y z
+        vertLine1 = new Line();
+        vertLine1.SetVerts(0.5f, -0.25f, 0.0f, -0.5f, -0.25f, 0f);
+        vertLine1.SetColor(.0f, .8f, 0f, 1.0f);
+
+
+        //+5 deg
+
+        vertLine2 = new Line();
+        vertLine2.SetVerts(0.5f, 0.25f, 0.0f, -0.5f, 0.25f, 0f);
+        vertLine2.SetColor(.0f, .8f, 0f, 1.0f);
+
+
+
+        //-10deg
+                                   // x y z x y z x y z
+        vertLine3 = new Line();
+        vertLine3.SetVerts(0.5f, -0.5f, 0.0f, -0.5f, -0.5f, 0f);
+        vertLine3.SetColor(.0f, .8f, 0f, 1.0f);
+
+
+        //+10 deg
+                                  // x y z x y z x y z
+        vertLine4 = new Line();
+        vertLine4.SetVerts(0.5f, 0.5f, 0.0f, -0.5f, 0.5f, 0f);
+        vertLine4.SetColor(.0f, .8f, 0f, 1.0f);
+
+
+
+
+
+
+
+
     }
 
     public void onDrawFrame(GL10 unused) {
@@ -82,7 +126,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
         // getModelValues();
         float mAngleNew = mDataModel.getRoll().floatValue();
-        float mPitchNew = (float) Math.sin(mDataModel.getPitch().doubleValue() * Math.PI / 180.0);
+        float mPitchNew = (float) Math.sin(mDataModel.getPitch().doubleValue() * Math.PI / 90.0);
         int mBatteryLevelNew = mDataModel.getBatteryLevel();
 
         UpActive = false;
@@ -99,8 +143,10 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
         //interpolation for added smoothness
 
-        mAngle = mAngle - ((mAngle - mAngleNew) / 3);
-        mPitch = mPitch - ((mPitch - mPitchNew) / 3);
+        mAngle = mAngle - ((mAngle - mAngleNew) / 2);
+        mPitch = mPitch - ((mPitch - mPitchNew) / 2);
+
+       // Log.d("Pitch", Float.toString(mPitch));
         mBatteryLevel = mBatteryLevelNew;
 
 
@@ -141,6 +187,10 @@ public class GLRenderer implements GLSurfaceView.Renderer {
         //Draw Battery Bar, color change is done in the Battery Class
         mBattery.draw(mBatteryLevel);
 
+        vertLine1.draw(mMVPMatrix);
+        vertLine2.draw(mMVPMatrix);
+        vertLine3.draw(mMVPMatrix);
+        vertLine4.draw(mMVPMatrix);
     }
 
     public void onSurfaceChanged(GL10 unused, int width, int height) {

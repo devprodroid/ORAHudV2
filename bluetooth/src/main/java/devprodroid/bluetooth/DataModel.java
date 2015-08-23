@@ -51,7 +51,7 @@ public class DataModel {
         BatteryTooLow = batteryTooLow;
     }
 
-    private Boolean BatteryTooLow;
+    private Boolean BatteryTooLow = false;
 
 
 

@@ -19,6 +19,7 @@ package devprodroid.orahudserver.connection;
 
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -76,6 +77,10 @@ public class BTListAdapter extends BaseAdapter {
 		    // Display the name and the MAC address
 		    tvName.setText(strName);
 		    tvMac.setText(strMac);
+
+			if (strName.contains("ORA-1")){
+				tvName.setTextColor(Color.GREEN);
+			}
 		}
 	 
 	    return convertView;

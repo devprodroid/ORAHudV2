@@ -23,6 +23,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -70,16 +71,21 @@ public class ConnectionActivity extends AppCompatActivity implements SwipeRefres
     }
 
     private void initializeWifi() {
+
+        final ImageView iv = (ImageView) findViewById(R.id.ivWifiConnection);
+
         WifiManager wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
 
         final TextView text = (TextView) findViewById(R.id.text_init);
         String WifiSSID = wifi.getConnectionInfo().getSSID();
-        text.setText("Connected to: " + WifiSSID);
+        text.setText("Not Connected to AR.Drone!");
         text.setTextColor(Color.BLACK);
+        iv.setImageResource(R.drawable.ic_perm_scan_wifi_black_24dp);
 
         if (WifiSSID.contains("ardrone")) {
             text.setText("Connected to AR.Drone");
             text.setTextColor(Color.GREEN);
+            iv.setImageResource(R.drawable.ic_perm_scan_wifi_green_24dp);
         }
 
 
@@ -282,18 +288,6 @@ public class ConnectionActivity extends AppCompatActivity implements SwipeRefres
             swipeLayout.setRefreshing(false);
         }
     }
-
-    /**
-     * Callback for the refresh button.
-     */
-    public void onBtnClicked(View v) {
-
-        if (v.getId() == R.id.btnDrone) {
-        //    initializeDrone();
-
-        }
-    }
-
 
     /**
      * Upon pressing the BACK-button, the user has to confirm the connection to the drone is taken down.

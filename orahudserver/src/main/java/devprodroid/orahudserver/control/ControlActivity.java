@@ -27,11 +27,6 @@ import java.io.IOException;
 import java.util.UUID;
 
 import de.yadrone.base.IARDrone;
-//import de.yadrone.base.exception.ARDroneException;
-//import de.yadrone.base.exception.CommandException;
-//import de.yadrone.base.exception.ConfigurationException;
-//import de.yadrone.base.exception.IExceptionListener;
-//import de.yadrone.base.exception.NavDataException;
 import de.yadrone.base.navdata.AcceleroListener;
 import de.yadrone.base.navdata.AcceleroPhysData;
 import de.yadrone.base.navdata.AcceleroRawData;
@@ -54,10 +49,6 @@ import devprodroid.orahudserver.SettingsActivity;
 import devprodroid.orahudserver.YADroneApplication;
 
 
-
-
-
-
 /**
  * This Activity displays Control interface and informations for the drone
  */
@@ -77,7 +68,9 @@ public class ControlActivity extends Activity implements SensorEventListener,
     private BTClient mBTClient;
     private Boolean btSending = false;
     private ProgressDialog mProgressDialog;
-    private TextView tvText;
+
+    private boolean mDebugMode;
+
     private DataModel mDataModel;
     private DroneControl mDroneControl;
     private YADroneApplication mApp;
@@ -87,7 +80,7 @@ public class ControlActivity extends Activity implements SensorEventListener,
     private Sensor mSensor;
     private static TextView tv;
     private boolean mDroneSendRunning = false;
-    private boolean mDebugMode;
+
     private boolean magnetoMode;
 
 
@@ -97,7 +90,7 @@ public class ControlActivity extends Activity implements SensorEventListener,
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_control);
 
-        tv = (TextView) findViewById(R.id.tv);
+
 
         registerSensors();
 
@@ -320,10 +313,15 @@ public class ControlActivity extends Activity implements SensorEventListener,
                                        public void onClick(View v) {
                                            if (!mDroneControl.isFlying()) {
                                                mDroneControl.takeoff();
-                                               landing.setText("Landing");
+                                               landing.setCompoundDrawablesWithIntrinsicBounds(getResources().getDrawable(R.drawable.ic_flight_land_black_24dp),
+                                                       null, null, null);
+                                               landing.setText("LAND");
+
                                            } else {
                                                mDroneControl.land();
-                                               landing.setText("Take Off");
+                                               landing.setCompoundDrawablesWithIntrinsicBounds(getResources().getDrawable(R.drawable.ic_flight_takeoff_black_24dp),
+                                                       null, null, null);
+                                               landing.setText("TAKE OFF");
                                            }
                                        }
                                    }

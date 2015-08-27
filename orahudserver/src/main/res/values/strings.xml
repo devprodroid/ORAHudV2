@@ -2,7 +2,7 @@
     <string name="app_name">ORAHudServer</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
-    <string name="pick_server">Pick BT Server</string>
+    <string name="pick_server">Pick Bluetooth Device</string>
     <string name="refresh">Refresh</string>
     <string name="title_activity_control">ControlActivity</string>
     <string name="prefDebugSummary">Enable Debug Console Output</string>
@@ -11,5 +11,6 @@
     <string name="prefOutdoorSummary">Configure Drone to Outdoor Flight</string>
     <string name="prefMagnetoSummary">Use Magnetometer Data for Yaw</string>
     <string name="prefMagnetoTitle">Use Magnetometer</string>
+    <string name="wifiwarn">WIFI Warning</string>
 
 </resources>

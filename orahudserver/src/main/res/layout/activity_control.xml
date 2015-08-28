@@ -19,15 +19,22 @@
             android:layout_width="125dp"
             android:layout_height="wrap_content"
             android:text="Take Off"
+            android:background="@drawable/border1"
             android:scaleType="fitStart"
-            android:drawableLeft="@drawable/ic_flight_takeoff_black_24dp" />
+            android:drawableLeft="@drawable/ic_flight_takeoff_black_24dp"
+            android:layout_marginRight="5dp"
+            android:paddingLeft="5dp"
+            android:layout_marginBottom="10dp" />
 
         <Button
             android:id="@+id/cmd_emergency"
             android:layout_width="125dp"
             android:layout_height="wrap_content"
             android:text="Emergency"
-            android:layout_gravity="right" />
+            android:background="@drawable/border1"
+            android:layout_gravity="right"
+            android:layout_marginLeft="5dp"
+            android:layout_marginBottom="10dp" />
 
 
     </LinearLayout>
@@ -40,10 +47,11 @@
 
         <LinearLayout
             android:orientation="vertical"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="center_vertical"
-            android:layout_weight="0.5" >
+            android:layout_weight="0.5"
+            android:layout_marginRight="5dp">
 
             <Button
                 android:layout_width="match_parent"
@@ -53,28 +61,31 @@
                 android:drawableLeft="@drawable/ic_swap_vert_black_up_24dp"
                 android:layout_weight="0.5"
                 android:layout_gravity="left"
-                android:background="#ffffff" />
+                android:background="@drawable/border1"
+                android:layout_marginBottom="5dp" />
 
             <Button
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Go Down"
                 android:id="@+id/btn_down"
-                android:layout_gravity="left"
                 android:drawableLeft="@drawable/ic_swap_vert_black_down_24dp"
                 android:layout_weight="0.5"
-                android:background="#ffffff" />
+                android:background="@drawable/border1"
+                android:layout_marginTop="5dp"
+                android:layout_gravity="left" />
         </LinearLayout>
 
         <LinearLayout
             android:orientation="vertical"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="center_horizontal"
-            android:layout_weight="0.5">
+            android:layout_weight="0.5"
+            android:layout_marginLeft="5dp">
 
             <Button
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/btn_tanslate"
                 android:layout_gravity="right"
@@ -83,10 +94,11 @@
                 android:drawableRight="@drawable/ic_swap_vert_black_24dp"
 
                 android:layout_weight="0.5"
-                android:background="#ffffff" />
+                android:background="@drawable/border1"
+                android:layout_marginBottom="5dp" />
 
             <Button
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Spin"
                 android:drawableLeft="@drawable/ic_cached_black_24dp"
@@ -94,7 +106,8 @@
                 android:id="@+id/btn_rotate"
                 android:layout_weight="0.5"
                 android:layout_gravity="right"
-                android:background="#ffffff" />
+                android:background="@drawable/border1"
+                android:layout_marginTop="5dp" />
         </LinearLayout>
 
     </LinearLayout>

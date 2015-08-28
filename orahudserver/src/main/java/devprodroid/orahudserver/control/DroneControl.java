@@ -106,33 +106,20 @@ public class DroneControl implements Runnable {
                 performAction = false;
                 if (isFlying()) {
 
-//                    if ((isTranslateMode()) && (isTiltControlActive())) {
-//                        //Pitch movement
-//                        performAction = pitchUpDown();
-//
-//                        //Roll Movement
-//                        performAction = rollLeftRight() || performAction;
-//                    } else if ((isRotateMode()) && (isTiltControlActive())) {
-//                        //Pitch movement
-//                        performAction = pitchUpDown();
-//
-//                        //Roll Movement
-//                        performAction = spinLeftRight() || performAction;
-//                    }
-
-
-
                    // move(int speedX, int speedY, int speedZ, int speedSpin)
-                    if (isTiltControlActive())
-                        if (isTranslateMode())
-                            cmd.move(-getPitch_angleNormed(),-getRoll_angleNormed(),0,0);
-                        else
-                        if (isRotateMode())
-                            cmd.move(-getPitch_angleNormed(),0,0,-getRoll_angleNormed());
+                    if (isTiltControlActive()) {
+                        if (isTranslateMode()){
+                            cmd.move(-getPitch_angleNormed(), -getRoll_angleNormed(), 0, 0);
+                            performAction=true;}
+                        else if (isRotateMode()){
+                            cmd.move(-getPitch_angleNormed(), 0, 0, -getRoll_angleNormed());
+                            performAction=true;}
+                    }
 
-                    //UpDown Movement
-                     goUpDown() ;
+                    performAction = performAction || goUpDown();
                     //We sleep for 20ms for performance reasons
+
+                    if (!performAction) hover();
                 }
                 sleep(sleepDuration);
             } else {

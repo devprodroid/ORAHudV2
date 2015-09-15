@@ -4,13 +4,14 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.os.AsyncTask;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -20,6 +21,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -83,6 +85,8 @@ public class ControlActivity extends Activity implements SensorEventListener,
 
     private boolean magnetoMode;
 
+    private WifiManager wifi;
+
 
 
     @Override
@@ -110,6 +114,13 @@ public class ControlActivity extends Activity implements SensorEventListener,
 
         initBluetoothConnection();
 
+
+        wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+
+        ProgressBar progBar= (ProgressBar)findViewById(R.id.progressBar);
+        progBar.setProgress(45);
+
+
     }
 
     /**
@@ -131,6 +142,7 @@ public class ControlActivity extends Activity implements SensorEventListener,
         nav = mDrone.getNavDataManager();
        // mDrone.getCommandManager().setNavDataDemo(false);
         mDroneControl.startThread();
+
         mDroneSendRunning = true;
 
         addDroneListeners();
@@ -352,6 +364,7 @@ public class ControlActivity extends Activity implements SensorEventListener,
         mDroneControl.startThread();
         mDroneSendRunning = true;
         startHandler();
+
         Log.d(TAG, "OnResume");
 
     }
@@ -367,6 +380,7 @@ public class ControlActivity extends Activity implements SensorEventListener,
         nav.addBatteryListener(this);
         nav.addAltitudeListener(this);
         nav.addAcceleroListener(this);
+
         if (magnetoMode) nav.addMagnetoListener(this);
 
         nav.addStateListener(this);
@@ -412,6 +426,7 @@ public class ControlActivity extends Activity implements SensorEventListener,
         nav.removeBatteryListener(this);
         nav.removeAltitudeListener(this);
         nav.removeAcceleroListener(this);
+
         if (magnetoMode) nav.removeMagnetoListener(this);
         nav.removeStateListener(this);
 
@@ -555,7 +570,46 @@ public class ControlActivity extends Activity implements SensorEventListener,
 
     public void startHandler() {
 
-;
+        startWifiQualityEval();
+        mHandler = new Handler();
+
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+
+                // mDataModel.setBatteryTooLow(true);
+                BTMessage msg = new BTMessage();
+                if (!btSending) {
+                    try {
+                        btSending = true;
+                        if (connected) {
+                            msg.setPayload(mDataModel.getFlightDataByteArray());
+                            mBTClient.sendMessage(msg);
+                        }
+
+
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } finally {
+                        btSending = false;
+
+                    }
+                }
+                if (mDroneSendRunning)
+                    mHandler.postDelayed(this, 20);
+            }
+        }, 20);
+
+    }
+
+    /**
+     *
+     * This thread fetches the current wifi strength
+     * It is started and stopped with the sending thread
+     */
+    public void startWifiQualityEval() {
+
+
         mHandler = new Handler();
 
         mHandler.postDelayed(new Runnable() {
@@ -563,47 +617,15 @@ public class ControlActivity extends Activity implements SensorEventListener,
             public void run() {
 
 
-                    BTMessage msg = new BTMessage();
-                    if (!btSending) {
-                        try {
-                            btSending = true;
-                            if (connected) {
-                                msg.setPayload(mDataModel.getFlightDataByteArray());
-                                mBTClient.sendMessage(msg);
-                            }
+                mDataModel.setLinkQuality(wifi.calculateSignalLevel(wifi.getConnectionInfo().getRssi(), 10));
 
-
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        } finally {
-                            btSending = false;
-
-                        }
-                    }
-               if (mDroneSendRunning)
-                   mHandler.postDelayed(this, 20);
+                if (mDroneSendRunning)
+                    mHandler.postDelayed(this, 1000);
             }
-        }, 20);
+        }, 1000);
 
     }
 
-//    @Override
-//    public void exeptionOccurred(ARDroneException exc) {
-//
-//
-//
-//        if (exc instanceof ConfigurationException)
-//        {
-//            Log.e(TAG,exc.getMessage());
-//        }
-//        else if (exc instanceof CommandException)
-//        {
-//            Log.e(TAG,exc.getMessage());
-//        }
-//        else if (exc instanceof NavDataException) {
-//            Log.e(TAG,exc.getMessage());
-//        }
-//    }
 
     @Override
     public void stateChanged(DroneState droneState) {
@@ -627,36 +649,6 @@ public class ControlActivity extends Activity implements SensorEventListener,
 
     }
 
-
-    private class SendtoBT extends AsyncTask<Float, Void, Boolean> {
-        BTMessage msg = new BTMessage();
-
-        @Override
-        protected Boolean doInBackground(Float... params) {
-
-            if (!btSending) {
-                try {
-                    btSending = true;
-                    if (connected) {
-
-
-                        msg.setPayload(mDataModel.getFlightDataByteArray());
-
-                        mBTClient.sendMessage(msg);
-
-                    }
-
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } finally {
-                    btSending = false;
-
-                }
-            }
-            return true;
-        }
-    }
 
 
 

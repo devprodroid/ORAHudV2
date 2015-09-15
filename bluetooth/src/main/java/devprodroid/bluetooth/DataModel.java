@@ -44,14 +44,24 @@ public class DataModel {
     private Boolean isFlying=false;
 
     public Boolean getBatteryTooLow() {
-        return BatteryTooLow=false;
+        return batteryTooLow;
     }
 
     public void setBatteryTooLow(Boolean batteryTooLow) {
-        BatteryTooLow = batteryTooLow;
+        this.batteryTooLow = batteryTooLow;
     }
 
-    private Boolean BatteryTooLow = false;
+    private Boolean batteryTooLow = false;
+
+    public Integer getLinkQuality() {
+        return linkQuality;
+    }
+
+    public void setLinkQuality(Integer linkQuality) {
+        this.linkQuality = linkQuality;
+    }
+
+    private Integer linkQuality =0;
 
 
 
@@ -140,7 +150,8 @@ public class DataModel {
         FlightData[6] = batteryLevel;
         FlightData[7] = accZ;
         FlightData[8] = (isFlying)? 1 : 0;
-        FlightData[9] = (BatteryTooLow)? 1 : 0;
+        FlightData[9] = (batteryTooLow)? 1 : 0;
+        FlightData[10]= linkQuality;
 
     }
 
@@ -161,7 +172,8 @@ public class DataModel {
             batteryLevel = FlightData[6];
             accZ = FlightData[7];
             isFlying = (FlightData[8]==1);
-            BatteryTooLow = (FlightData[9]==1);
+            batteryTooLow = (FlightData[9]==1);
+            linkQuality= FlightData[10];
         }
     }
 

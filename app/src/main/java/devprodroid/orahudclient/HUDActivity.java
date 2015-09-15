@@ -49,6 +49,8 @@ public class HUDActivity extends Activity {
 
 
     private TextView tvBattery;
+    private TextView tvWifi;
+
     private TextView tvAltitude;
     private TextView tvYaw;
 
@@ -88,6 +90,7 @@ public class HUDActivity extends Activity {
     Intent serviceIntent;
 
     ValueAnimator colorAnim;
+    private boolean mBatteryAnimationRunning=false;
 
     public HUDActivity() {
         dataModel = new DataModel();
@@ -132,6 +135,8 @@ public class HUDActivity extends Activity {
 
 
         tvBattery = (TextView) findViewById(R.id.tvBattery);
+        tvWifi = (TextView) findViewById(R.id.tvWifi);
+
         tvAltitude = (TextView) findViewById(R.id.tvAltitude);
         tvYaw = (TextView) findViewById(R.id.tvYaw);
 
@@ -139,12 +144,10 @@ public class HUDActivity extends Activity {
 
 
 
-        colorAnim = ObjectAnimator.ofInt(tvBattery, "backgroundColor", Color.RED
-                , Color.BLACK);
-        colorAnim.setDuration(500);
-        colorAnim.setEvaluator(new ArgbEvaluator());
-        colorAnim.setRepeatCount(ValueAnimator.INFINITE);
-        colorAnim.setRepeatMode(ValueAnimator.REVERSE);
+
+
+
+
 
     }
 
@@ -188,7 +191,7 @@ public class HUDActivity extends Activity {
     }
 
 
-    // Using the following method, we will handle all screen swaps.
+    // Using the folloing method, we will handle all screen swaps.
     public boolean onTouchEvent(MotionEvent touchevent) {
         switch (touchevent.getAction()) {
 
@@ -314,23 +317,62 @@ public class HUDActivity extends Activity {
 
         //fixed HUD Values
 
-        if (!dataModel.getBatteryTooLow()) {
-            tvBattery.setTextColor(Color.GREEN);
-            tvBattery.setText(getString(R.string.lblBatt) + dataModel.getBatteryLevel() + "%");
-            colorAnim.cancel();
-        }
-        else {
-            tvBattery.setText(getString(R.string.lblBattLow));
-            colorAnim.start();
+        animateBatteryIndicator();
 
-            //tvBattery.setTextColor(Color.RED);
-        }
-        tvAltitude.setText(getString(R.string.lblAlt) + String.format("%.1f", dataModel.getAltitudeM())+ "m");
-       // Log.d("ALT", Integer.toString(dataModel.getAltitude()));
+        tvWifi.setText("Wifi: " + dataModel.getLinkQuality()+"/10");
+
+
+        tvAltitude.setText(getString(R.string.lblAlt) + String.format("%.1f", dataModel.getAltitudeM()) + "m");
+
+
         tvYaw.setText("HDG: " + dataModel.getYaw() + "°");
 
 
 
+    }
+
+    /**
+     * Animates the Battery Indicating Textview with color and text changes
+     */
+    private void animateBatteryIndicator() {
+
+
+
+        if ((dataModel.getBatteryTooLow()) || (dataModel.getBatteryLevel() < 20)) {
+          //  Log.d("Battery too low", (dataModel.getBatteryTooLow().toString()));
+            if (dataModel.getBatteryTooLow())
+                tvBattery.setText(getString(R.string.lblBattLow));
+
+            colorAnim = ObjectAnimator.ofInt(tvBattery, "backgroundColor", Color.BLACK, Color.RED);
+            colorAnim.setDuration(500);
+            colorAnim.setEvaluator(new ArgbEvaluator());
+            colorAnim.setRepeatCount(ValueAnimator.INFINITE);
+            colorAnim.setRepeatMode(ValueAnimator.REVERSE);
+            if (!mBatteryAnimationRunning) {
+
+                colorAnim.start();
+                mBatteryAnimationRunning = true;
+
+            }
+
+
+            tvBattery.setTextColor(Color.WHITE);
+        } else {
+
+
+            tvBattery.setTextColor(Color.GREEN);
+            tvBattery.setText(getString(R.string.lblBatt) + dataModel.getBatteryLevel() + "%");
+
+              if (colorAnim!=null) {
+                  colorAnim.cancel();
+                  colorAnim.end();
+
+            }
+            mBatteryAnimationRunning = false;
+
+
+
+        }
     }
 
     /**

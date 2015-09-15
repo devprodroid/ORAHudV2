@@ -32,6 +32,19 @@
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textColor="#00ff00" />
 
+        <TextView
+            android:id="@+id/tvWifi"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/lblbackborder"
+
+            android:padding="2dp"
+            android:text="WIFI: 10/10"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="#00ff00"
+            android:layout_below="@+id/tvBattery"
+            android:layout_alignParentStart="true" />
+
 
         <TextView
             android:id="@+id/tvAltitude"

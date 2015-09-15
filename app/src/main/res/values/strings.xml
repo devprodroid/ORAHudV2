@@ -12,6 +12,6 @@
     <string name="lblBTNotRunning">Bluetooth not running</string>
     <string name="lblIncorrectUUID">Incorrect Bluetooth UUID</string>
     <string name="lblAlt">"Alt: "</string>
-    <string name="lblBattLow">Batt LOW</string>
+    <string name="lblBattLow">BATT LOW</string>
 
 </resources>

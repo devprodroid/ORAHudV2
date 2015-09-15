@@ -47,6 +47,7 @@ public class ConnectionActivity extends AppCompatActivity implements SwipeRefres
     private static final String TAG = ConnectionActivity.class.getName();
     private static final int REQUEST_ENABLE_BT = 1;
     public boolean mDebugMode;
+    public boolean mCompatibilityMode;
     private static final UUID serv_UUID = UUID.fromString("07419c1a-090c-11e5-a6c0-1697f925ec7b");
     List<BluetoothDevice> validDevices = new ArrayList<>();
 
@@ -74,10 +75,15 @@ public class ConnectionActivity extends AppCompatActivity implements SwipeRefres
 
         final ImageView iv = (ImageView) findViewById(R.id.ivWifiConnection);
 
-        WifiManager wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+        WifiManager wifi;
+        wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+
 
         final TextView text = (TextView) findViewById(R.id.text_init);
         String WifiSSID = wifi.getConnectionInfo().getSSID();
+
+
+
         text.setText("Not Connected to AR.Drone!");
         text.setTextColor(Color.BLACK);
         iv.setImageResource(R.drawable.ic_perm_scan_wifi_black_24dp);
@@ -134,7 +140,7 @@ public class ConnectionActivity extends AppCompatActivity implements SwipeRefres
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
 
         mDebugMode = sharedPref.getBoolean(SettingsActivity.KEY_PREF_DEBUG, false);
-
+        mCompatibilityMode= sharedPref.getBoolean(SettingsActivity.KEY_PREF_COMPAT, false);
 
     }
 
@@ -171,7 +177,7 @@ public class ConnectionActivity extends AppCompatActivity implements SwipeRefres
                     // Search our UUID server through the list of available UUID
                     // on the remote device
                     for (ParcelUuid pu : puList) {
-                        if (pu.getUuid().compareTo(serv_UUID) == 0) {
+                        if ((mCompatibilityMode) || (pu.getUuid().compareTo(serv_UUID) == 0)) {
                           if (mDebugMode) Log.d(TAG, "Compatible server found.");
 
                             //Check if the device is not already present in the list.

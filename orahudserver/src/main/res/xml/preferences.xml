@@ -16,4 +16,10 @@
         android:summary="@string/prefMagnetoSummary"
         android:defaultValue="false" />
 
+    <CheckBoxPreference
+        android:key="pref_compat"
+        android:title="Bluetooth Compatibility Mode"
+        android:summary="Enable skipping of UUID-Check for Android 5 BT Bug"
+        android:defaultValue="false" />
+
 </PreferenceScreen>

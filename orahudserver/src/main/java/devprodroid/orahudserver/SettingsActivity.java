@@ -10,6 +10,8 @@ public class SettingsActivity extends PreferenceActivity   {
 
 
     public static final String KEY_PREF_DEBUG = "pref_debug";
+    public static final String KEY_PREF_COMPAT = "pref_compat";
+
     public static final String KEY_PREF_OUTDOOR_MODE = "pref_outdoor";
     public static final String KEY_PREF_MAGNETO_MODE = "pref_magneto";
 

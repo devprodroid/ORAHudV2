@@ -14,12 +14,14 @@ import javax.microedition.khronos.opengles.GL10;
 import devprodroid.bluetooth.DataModel;
 
 public class GLRenderer implements GLSurfaceView.Renderer {
-    private Horizon mHorizon;
+    private HorizonRight mHorizonRight;
+    private HorizonLeft mHorizonLeft;
+
 
     private UpArrow mUpArrow;
     private DownArrow mDownArrow;
     private Attitude mAttitude;
-
+    private AttitudeCenter mAttitudeCenter;
     private Compass mCompass;
 
     private Battery mBattery;
@@ -71,9 +73,12 @@ public class GLRenderer implements GLSurfaceView.Renderer {
 
 
         mAttitude = new Attitude(); //attitude
+        mAttitudeCenter = new AttitudeCenter(); //attitudeCenter Arrow
+
         mCompass = new Compass();   //Compass Image
 
-        mHorizon = new Horizon(); //Artificial horizon
+        mHorizonRight = new HorizonRight(); //Artificial horizon
+        mHorizonLeft = new HorizonLeft(); //Artificial horizon
 
         mUpArrow = new UpArrow();
         mDownArrow = new DownArrow();
@@ -175,19 +180,29 @@ public class GLRenderer implements GLSurfaceView.Renderer {
         Matrix.setIdentityM(transMatrix, 0);
         Matrix.translateM(transMatrix, 0, 0f, mPitch, 0);
 
-        //Set Rotation for attitude Marker
-        Matrix.setRotateM(mRotationMatrix, 0, mAngle, 0, 0, 1.0f);
 
-        Matrix.multiplyMM(transMatrix, 0,transMatrix , 0,mRotationMatrix , 0);
+        //Set Rotation for attitude Marker
+        Matrix.rotateM(transMatrix, 0, mAngle, 0, 0, 1.0f);
+
+        //Matrix.multiplyMM(transMatrix, 0, transMatrix, 0, mRotationMatrix, 0);
 
         // Combine the rotation matrix with the projection and camera view
         Matrix.multiplyMM(scratch, 0, mMVPMatrix, 0, transMatrix, 0);
 
         //Draw attitude lines
         mAttitude.draw(scratch);
+        mAttitudeCenter.draw(scratch);
 
-        //Draw fixed Horizon
-        mHorizon.draw();
+
+
+
+
+
+
+
+        //Draw fixed HorizonRight
+        mHorizonRight.draw();
+        mHorizonLeft.draw();
 
         mUpArrow.draw(UpActive);
         mDownArrow.draw(DownActive);

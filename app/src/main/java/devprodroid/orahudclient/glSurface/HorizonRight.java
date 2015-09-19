@@ -7,7 +7,7 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
-public class Horizon {
+public class HorizonRight {
 
     private FloatBuffer vertexBuffer;
     private ShortBuffer drawListBuffer;
@@ -26,8 +26,8 @@ public class Horizon {
     // number of coordinates per vertex in this array
     static final int COORDS_PER_VERTEX = 3;
     static float squareCoords[] = {
-            -0.5f, 0.01f, 0.0f,   // top left
-            -0.5f, -0.01f, 0.0f,   // bottom left
+            0.1f, 0.01f, 0.0f,   // top left
+            0.1f, -0.01f, 0.0f,   // bottom left
             0.5f, -0.01f, 0.0f,   // bottom right
             0.5f, 0.01f, 0.0f}; // top right
 
@@ -72,7 +72,7 @@ public class Horizon {
         GLES20.glDisableVertexAttribArray(mPositionHandle);
     }
 
-    public Horizon() {
+    public HorizonRight() {
         // initialize vertex byte buffer for shape coordinates
         ByteBuffer bb = ByteBuffer.allocateDirect(
                 // (# of coordinate values * 4 bytes per float)

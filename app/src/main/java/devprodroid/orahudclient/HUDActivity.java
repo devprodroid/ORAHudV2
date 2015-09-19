@@ -46,7 +46,7 @@ public class HUDActivity extends Activity {
     private ViewFlipper viewFlipper;
     private float lastX;
 
-
+    ValueAnimator colorAnim;
 
     private TextView tvBattery;
     private TextView tvWifi;
@@ -89,7 +89,7 @@ public class HUDActivity extends Activity {
 
     Intent serviceIntent;
 
-    ValueAnimator colorAnim;
+
     private boolean mBatteryAnimationRunning=false;
 
     public HUDActivity() {
@@ -115,14 +115,12 @@ public class HUDActivity extends Activity {
         layout.addView(glSurfaceView, glParams);
 
 
+
         // final View controlsView = findViewById(R.id.btn_bt_connect);
         // final View contentView = findViewById(R.id.main_layout);
         serviceIntent = new Intent(this, BT_Service.class);
 
         isBluetoothAvailable();
-
-
-
 
         Button bt_connectBtn = (Button) findViewById(R.id.btn_bt_connect);
         //bt_connectBtn.setOnTouchListener(mDelayHideTouchListener);
@@ -133,8 +131,8 @@ public class HUDActivity extends Activity {
             }
         });
 
-
         tvBattery = (TextView) findViewById(R.id.tvBattery);
+        colorAnim = ObjectAnimator.ofInt(tvBattery, "backgroundColor", Color.RED, Color.BLACK);
         tvWifi = (TextView) findViewById(R.id.tvWifi);
 
         tvAltitude = (TextView) findViewById(R.id.tvAltitude);
@@ -343,33 +341,23 @@ public class HUDActivity extends Activity {
             if (dataModel.getBatteryTooLow())
                 tvBattery.setText(getString(R.string.lblBattLow));
 
-            colorAnim = ObjectAnimator.ofInt(tvBattery, "backgroundColor", Color.BLACK, Color.RED);
+
+
+            tvBattery.setText(getString(R.string.lblBatt) + dataModel.getBatteryLevel() + "%");
             colorAnim.setDuration(500);
             colorAnim.setEvaluator(new ArgbEvaluator());
             colorAnim.setRepeatCount(ValueAnimator.INFINITE);
             colorAnim.setRepeatMode(ValueAnimator.REVERSE);
-            if (!mBatteryAnimationRunning) {
 
+            if(!colorAnim.isRunning()) {
                 colorAnim.start();
-                mBatteryAnimationRunning = true;
-
             }
-
-
             tvBattery.setTextColor(Color.WHITE);
         } else {
 
-
+            colorAnim.end();
             tvBattery.setTextColor(Color.GREEN);
             tvBattery.setText(getString(R.string.lblBatt) + dataModel.getBatteryLevel() + "%");
-
-              if (colorAnim!=null) {
-                  colorAnim.cancel();
-                  colorAnim.end();
-
-            }
-            mBatteryAnimationRunning = false;
-
 
 
         }

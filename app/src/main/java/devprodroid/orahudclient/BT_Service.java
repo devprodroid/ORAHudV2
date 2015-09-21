@@ -15,6 +15,11 @@ import devprodroid.bluetooth.BTServerService;
 public class BT_Service extends BTServerService {
 
     public static final String BROADCAST_ACTION = "devprodroid.orahudclient.displayevent";
+
+    public static final Byte bDontCare =0;
+    public static final Byte bConnected =1;
+    public static final Byte bDisconnected =2;
+
     private final Handler handler = new Handler();
     Intent intent;
     int counter = 0;
@@ -46,7 +51,9 @@ public class BT_Service extends BTServerService {
 
     @Override
     public void onClientConnected(BluetoothSocket bluetoothSocket) {
-
+        BTMessage msgTmp = new BTMessage();
+        msgTmp.setConnectionState(bConnected);
+        handle(msgTmp);
     }
 
     @Override
@@ -68,17 +75,25 @@ public class BT_Service extends BTServerService {
     @Override
     public void onDisconnected(BluetoothDevice bluetoothDevice) {
         Log.i(TAG, bluetoothDevice.getName() + " disconnected");
+        BTMessage msgTmp = new BTMessage();
+        msgTmp.setConnectionState(bDisconnected);
+        handle(msgTmp);
     }
 
 
     //TODO: Implement message Handling
     public BTMessage handle(BTMessage msg) {
-        //byte eventType = msg.getMsgType();
-        byte[] payload = msg.getPayload();
+        byte connectionState = msg.getConnectionState();
 
-                intent.putExtra("payload", payload);
-                sendBroadcast(intent);
-
+        if (connectionState == bDontCare) {
+            byte[] payload = msg.getPayload();
+            intent.putExtra("connection", connectionState);
+            intent.putExtra("payload", payload);
+            sendBroadcast(intent);
+        } else {
+            intent.putExtra("connection", connectionState);
+            sendBroadcast(intent);
+        }
 
         return null;
     }

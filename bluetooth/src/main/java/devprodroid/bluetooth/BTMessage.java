@@ -6,8 +6,18 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 public class BTMessage {
-
+    public static final Byte bDontCare =0;
     private byte[] payload;
+
+    public byte getConnectionState() {
+        return ConnectionState;
+    }
+
+    public void setConnectionState(byte connectionState) {
+        ConnectionState = connectionState;
+    }
+
+    private byte ConnectionState=bDontCare;
 
     public BTMessage() {
     }

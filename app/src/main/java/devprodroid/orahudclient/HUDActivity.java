@@ -40,10 +40,16 @@ public class HUDActivity extends Activity {
     private static final String serv_UUID = "07419c1a-090c-11e5-a6c0-1697f925ec7b";
     private static final String serv_name = "ORA Server";
 
+
+    public static final Byte bDontCare =0;
+    public static final Byte bConnected =1;
+    public static final Byte bDisconnected =2;
+
     private static final int REQUEST_ENABLE_BT = 1;
 
     private GLSurfaceView glSurfaceView;
     private ViewFlipper viewFlipper;
+
     private float lastX;
 
     ValueAnimator colorAnim;
@@ -101,6 +107,7 @@ public class HUDActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+
         setContentView(R.layout.activity_hud);
         viewFlipper = (ViewFlipper) findViewById(R.id.viewFlipper);
 
@@ -114,10 +121,6 @@ public class HUDActivity extends Activity {
 
         layout.addView(glSurfaceView, glParams);
 
-
-
-        // final View controlsView = findViewById(R.id.btn_bt_connect);
-        // final View contentView = findViewById(R.id.main_layout);
         serviceIntent = new Intent(this, BT_Service.class);
 
         isBluetoothAvailable();
@@ -133,20 +136,11 @@ public class HUDActivity extends Activity {
 
         tvBattery = (TextView) findViewById(R.id.tvBattery);
         colorAnim = ObjectAnimator.ofInt(tvBattery, "backgroundColor", Color.RED, Color.BLACK);
+
         tvWifi = (TextView) findViewById(R.id.tvWifi);
 
         tvAltitude = (TextView) findViewById(R.id.tvAltitude);
         tvYaw = (TextView) findViewById(R.id.tvYaw);
-
-
-
-
-
-
-
-
-
-
     }
 
 
@@ -271,7 +265,7 @@ public class HUDActivity extends Activity {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            updateUI(intent);
+           updateUI(intent);
         }
     };
 
@@ -317,15 +311,13 @@ public class HUDActivity extends Activity {
 
         animateBatteryIndicator();
 
-        tvWifi.setText("Wifi: " + dataModel.getLinkQuality()+"/10");
+        tvWifi.setText("Wifi: " + dataModel.getLinkQuality() + "/10");
 
 
         tvAltitude.setText(getString(R.string.lblAlt) + String.format("%.1f", dataModel.getAltitudeM()) + "m");
 
 
         tvYaw.setText("HDG: " + dataModel.getYaw() + "°");
-
-
 
     }
 
@@ -334,15 +326,7 @@ public class HUDActivity extends Activity {
      */
     private void animateBatteryIndicator() {
 
-
-
         if ((dataModel.getBatteryTooLow()) || (dataModel.getBatteryLevel() < 20)) {
-          //  Log.d("Battery too low", (dataModel.getBatteryTooLow().toString()));
-            if (dataModel.getBatteryTooLow())
-                tvBattery.setText(getString(R.string.lblBattLow));
-
-
-
             tvBattery.setText(getString(R.string.lblBatt) + dataModel.getBatteryLevel() + "%");
             colorAnim.setDuration(500);
             colorAnim.setEvaluator(new ArgbEvaluator());
@@ -354,25 +338,40 @@ public class HUDActivity extends Activity {
             }
             tvBattery.setTextColor(Color.WHITE);
         } else {
-
             colorAnim.end();
             tvBattery.setTextColor(Color.GREEN);
+            tvBattery.setBackgroundResource(R.drawable.lblbackborder);
             tvBattery.setText(getString(R.string.lblBatt) + dataModel.getBatteryLevel() + "%");
-
-
         }
     }
 
     /**
-     * Read Intent Payload and update DataModel
+     * Read Intent Payload and update DataModel with current values
      *
      * @param intent Intent with payload
      */
     private void parsePayload(Intent intent) {
+        byte connection= intent.getByteExtra("connection", bDontCare);
 
-        byte[] message = intent.getByteArrayExtra("payload");
-        dataModel.setFlightData(message);
-        //glSurfaceView.requestRender();
+        if (connection==bDontCare) {
+
+            byte[] message = intent.getByteArrayExtra("payload");
+            dataModel.setFlightData(message);
+        } else {
+            if (connection == bConnected) {
+                Toast.makeText(HUDActivity.this, "Connected", TOAST_DURATION).show();
+                // Next screen comes in from right.
+                viewFlipper.setInAnimation(this, R.anim.slide_in_from_right);
+                // Current screen goes out from left.
+                viewFlipper.setOutAnimation(this, R.anim.slide_out_to_left);
+
+
+                viewFlipper.setDisplayedChild(2);
+            }
+            if (connection == bDisconnected) {
+                Toast.makeText(HUDActivity.this, "Disconnected", TOAST_DURATION).show();
+            }
+        }
     }
 
 
@@ -401,11 +400,18 @@ public class HUDActivity extends Activity {
         return false;
     }
 
-
+    /**
+     * Check if Bluetooth Service is running
+     * @return
+     */
     public boolean isBtServiceRunning() {
         return isMyServiceRunning(BT_Service.class);
     }
 
+    /**
+     * Check if Bluetooth is available and ask user to enable
+     * @return
+     */
     public boolean isBluetoothAvailable() {
         BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 

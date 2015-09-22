@@ -81,6 +81,8 @@ public class ControlActivity extends Activity implements SensorEventListener,
     private SensorManager mSensorManager;
     private Sensor mSensor;
     private static TextView tv;
+    private static TextView tvBattery;
+    private static ProgressBar pbBattery;
     private boolean mDroneSendRunning = false;
 
     private boolean magnetoMode;
@@ -108,6 +110,7 @@ public class ControlActivity extends Activity implements SensorEventListener,
 
 
 
+
         initDrone();
         // addDroneListeners();
         Log.d(TAG, "OnStart");
@@ -117,8 +120,11 @@ public class ControlActivity extends Activity implements SensorEventListener,
 
         wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
 
-        ProgressBar progBar= (ProgressBar)findViewById(R.id.progressBar);
-        progBar.setProgress(45);
+        tvBattery = (TextView) findViewById(R.id.tvBattery);
+        tvBattery.setText("100%");
+        pbBattery= (ProgressBar)findViewById(R.id.progressBar);
+
+        pbBattery.setProgress(100);
 
 
     }
@@ -517,6 +523,10 @@ public class ControlActivity extends Activity implements SensorEventListener,
     @Override
     public void batteryLevelChanged(int batteryLevel) {
         mDataModel.setBatteryLevel(batteryLevel);
+        pbBattery.setProgress(batteryLevel);
+        pbBattery.setProgress(batteryLevel);
+        tvBattery.setText(batteryLevel+"%");
+
         //  Log.d(TAG, "AR.Drone Battery: " + batteryLevel);
 
 

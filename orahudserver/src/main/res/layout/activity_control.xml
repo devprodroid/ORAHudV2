@@ -76,7 +76,10 @@
                 android:text="100%"
                 android:layout_marginStart="6dp"
                 android:layout_centerVertical="true"
-                android:layout_alignStart="@+id/progressBar" />
+                android:layout_alignStart="@+id/progressBar"
+                android:autoText="false"
+                android:elegantTextHeight="false"
+                android:gravity="center_horizontal" />
 
             <TextView
                 android:layout_width="wrap_content"

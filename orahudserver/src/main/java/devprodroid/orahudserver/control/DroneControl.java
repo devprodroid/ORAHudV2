@@ -112,7 +112,7 @@ public class DroneControl implements Runnable {
                             cmd.move(-getPitch_angleNormed(), -getRoll_angleNormed(), 0, 0);
                             performAction=true;}
                         else if (isRotateMode()){
-                            cmd.move(-getPitch_angleNormed(), 0, 0, -getRoll_angleNormed());
+                            cmd.move(-getPitch_angleNormed(), 0, 0, -getRoll_angleNormed()*2);
                             performAction=true;}
                     }
 

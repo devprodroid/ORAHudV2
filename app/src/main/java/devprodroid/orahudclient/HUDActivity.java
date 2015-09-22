@@ -60,6 +60,8 @@ public class HUDActivity extends Activity {
     private TextView tvAltitude;
     private TextView tvYaw;
 
+    private boolean mConnected =false;
+
     /**
      * Whether or not the system UI should be auto-hidden after
      * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
@@ -311,13 +313,18 @@ public class HUDActivity extends Activity {
 
         animateBatteryIndicator();
 
-        tvWifi.setText("Wifi: " + dataModel.getLinkQuality() + "/10");
-
+        if (mConnected) {
+            tvWifi.setText("Wifi: " + dataModel.getLinkQuality() + "/10");
+        }
+        else
+            tvWifi.setText("DISCONECT");
 
         tvAltitude.setText(getString(R.string.lblAlt) + String.format("%.1f", dataModel.getAltitudeM()) + "m");
 
 
         tvYaw.setText("HDG: " + dataModel.getYaw() + "°");
+
+
 
     }
 
@@ -367,9 +374,13 @@ public class HUDActivity extends Activity {
 
 
                 viewFlipper.setDisplayedChild(2);
+                mConnected=true;
             }
             if (connection == bDisconnected) {
                 Toast.makeText(HUDActivity.this, "Disconnected", TOAST_DURATION).show();
+                mConnected=false;
+                dataModel.resetData();
+
             }
         }
     }

@@ -277,4 +277,31 @@ public class DataModel {
                 .append("}").toString();
     }
 
+    public void resetData(){
+
+
+        //from AttitudeListener
+        pitch = 0;
+        roll = 0;
+        yaw = 0;
+
+        pitchCompensation = 0;
+        rollCompensation = 0;
+
+        //from AltitudeListener
+        altitude = 0;
+
+        //from BatteryListener
+        batteryLevel = 0;
+        voltage = 0;
+
+
+        accZ = 0;
+        isFlying = false;
+        batteryTooLow = false;
+
+        linkQuality = 0;
+    }
+
+
 }

@@ -345,7 +345,8 @@ public class ControlActivity extends Activity implements SensorEventListener,
 
                                      {
                                          public void onClick(View v) {
-                                             mDrone.reset();
+                                             //mDrone.reset();
+                                             mDrone.getCommandManager().emergency();
                                              Log.d("DebugLand", "reset");
                                          }
                                      }
@@ -540,7 +541,7 @@ public class ControlActivity extends Activity implements SensorEventListener,
     public void onSensorChanged(SensorEvent event) {
 
         //landscape config
-
+       // mDataModel.setBatteryLevel(Math.round(event.values[0]*10));
         mDroneControl.setPitch_angle(event.values[0]);
         mDroneControl.setRoll_angle(event.values[1]);
 
@@ -571,13 +572,23 @@ public class ControlActivity extends Activity implements SensorEventListener,
     public void startHandler() {
 
         startWifiQualityEval();
+
+
+//        mDataModel.setBatteryLevel(85);
+//        mDataModel.setPitch(7);
+//        mDataModel.setRoll(15);
+//        mDataModel.setAltitude(1200);
+//        mDataModel.setYaw(335);
+
+
+
         mHandler = new Handler();
 
         mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
 
-                // mDataModel.setBatteryTooLow(true);
+                //mDataModel.setRoll();
                 BTMessage msg = new BTMessage();
                 if (!btSending) {
                     try {
@@ -633,10 +644,8 @@ public class ControlActivity extends Activity implements SensorEventListener,
         mDataModel.setIsFlying(droneState.isFlying());
         mDroneControl.setIsFlying(droneState.isFlying());
 
+
         mDataModel.setBatteryTooLow(droneState.isBatteryTooLow());
-
-
-
 
         if (droneState.isTooMuchWind())
             Log.d("DroneState", "isTooMuchWind True");

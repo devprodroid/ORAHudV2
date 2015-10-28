@@ -66,6 +66,8 @@ public class DataModel {
 
 
 
+
+
     public DataModel() {
         FlightData = new int[64];
 

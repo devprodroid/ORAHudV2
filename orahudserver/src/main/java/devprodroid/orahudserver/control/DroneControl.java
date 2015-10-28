@@ -306,7 +306,7 @@ public class DroneControl implements Runnable {
      */
     public void hover() {
         drone.hover();
-        Log.d(TAG, "Hover");
+      //  Log.d(TAG, "Hover");
 
 
     }

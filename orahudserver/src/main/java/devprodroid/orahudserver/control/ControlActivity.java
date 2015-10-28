@@ -522,13 +522,12 @@ public class ControlActivity extends Activity implements SensorEventListener,
 
     @Override
     public void batteryLevelChanged(int batteryLevel) {
-        mDataModel.setBatteryLevel(batteryLevel);
-        pbBattery.setProgress(batteryLevel);
-        pbBattery.setProgress(batteryLevel);
-        tvBattery.setText(batteryLevel+"%");
+        if (!(batteryLevel == mDataModel.getBatteryLevel())){
+            mDataModel.setBatteryLevel(batteryLevel);
 
-        //  Log.d(TAG, "AR.Drone Battery: " + batteryLevel);
-
+            pbBattery.setProgress(batteryLevel);
+            tvBattery.setText(batteryLevel + "%");
+        }
 
     }
 
@@ -554,6 +553,8 @@ public class ControlActivity extends Activity implements SensorEventListener,
        // mDataModel.setBatteryLevel(Math.round(event.values[0]*10));
         mDroneControl.setPitch_angle(event.values[0]);
         mDroneControl.setRoll_angle(event.values[1]);
+
+
 
     }
 
@@ -599,6 +600,7 @@ public class ControlActivity extends Activity implements SensorEventListener,
             public void run() {
 
                 //mDataModel.setRoll();
+
                 BTMessage msg = new BTMessage();
                 if (!btSending) {
                     try {
@@ -613,7 +615,6 @@ public class ControlActivity extends Activity implements SensorEventListener,
                         e.printStackTrace();
                     } finally {
                         btSending = false;
-
                     }
                 }
                 if (mDroneSendRunning)

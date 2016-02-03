@@ -71,7 +71,6 @@ public class GLRenderer implements GLSurfaceView.Renderer {
         // Set the background frame color
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-
         mAttitude = new Attitude(); //attitude
         mAttitudeCenter = new AttitudeCenter(); //attitudeCenter Arrow
 
@@ -90,14 +89,11 @@ public class GLRenderer implements GLSurfaceView.Renderer {
         vertLine1.SetVerts(0.5f, -0.25f, 0.0f, -0.5f, -0.25f, 0f);
         vertLine1.SetColor(.0f, .8f, 0f, 1.0f);
 
-
         //+5 deg
 
         vertLine2 = new Line();
         vertLine2.SetVerts(0.5f, 0.25f, 0.0f, -0.5f, 0.25f, 0f);
         vertLine2.SetColor(.0f, .8f, 0f, 1.0f);
-
-
 
         //-10deg
                                    // x y z x y z x y z
@@ -105,19 +101,11 @@ public class GLRenderer implements GLSurfaceView.Renderer {
         vertLine3.SetVerts(0.5f, -0.5f, 0.0f, -0.5f, -0.5f, 0f);
         vertLine3.SetColor(.0f, .8f, 0f, 1.0f);
 
-
         //+10 deg
                                   // x y z x y z x y z
         vertLine4 = new Line();
         vertLine4.SetVerts(0.5f, 0.5f, 0.0f, -0.5f, 0.5f, 0f);
         vertLine4.SetColor(.0f, .8f, 0f, 1.0f);
-
-
-
-
-
-
-
 
     }
 

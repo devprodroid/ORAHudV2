@@ -303,11 +303,9 @@ public class HUDActivity extends Activity {
      */
     private void updateUI(Intent intent) {
 
-
         parsePayload(intent);
 
         // Update UI Elements
-
 
         //fixed HUD Values
 
@@ -321,11 +319,7 @@ public class HUDActivity extends Activity {
 
         tvAltitude.setText(getString(R.string.lblAlt) + String.format("%.1f", dataModel.getAltitudeM()) + "m");
 
-
         tvYaw.setText("HDG: " + dataModel.getYaw() + "°");
-
-
-
     }
 
     /**

@@ -4,7 +4,7 @@ import android.os.Bundle;
 import android.preference.PreferenceActivity;
 
 /**
- * Created by robert on 17.08.15.
+ * Settings Screen
  */
 public class SettingsActivity extends PreferenceActivity   {
 

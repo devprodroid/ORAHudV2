@@ -6,7 +6,9 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
-
+/**
+ * Custom Attitude Marker
+ */
 public class Attitude {
 
     private FloatBuffer vertexBuffer;

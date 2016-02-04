@@ -6,7 +6,9 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
-
+/**
+ * Center of the Attitude MArker
+ */
 public class AttitudeCenter {
 
     private FloatBuffer vertexBuffer;

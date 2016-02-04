@@ -29,7 +29,9 @@ import android.widget.TextView;
 import java.util.List;
 
 import devprodroid.orahudserver.R;
-
+/**
+ *  List adapter for bluetooth devices and callbacks
+ */
 public class BTListAdapter extends BaseAdapter {
 
 	private Context _context;

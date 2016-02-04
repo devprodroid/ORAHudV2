@@ -6,7 +6,9 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
-
+/**
+ * Custom Arrow showing the direction
+ */
 public class Compass {
 
     private FloatBuffer vertexBuffer;

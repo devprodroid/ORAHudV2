@@ -7,7 +7,7 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
 /**
- * Created by robert on 22.08.15.
+ * Line as Pitch indicator
  */
 public class Line {
 

@@ -35,7 +35,10 @@ public class GLSurf extends GLSurfaceView {
         setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
     }
 
-
+    /**
+     * Rotate the horizon according to the input angle
+     * @param angle
+     */
     public void rotateHorizon(float angle){
         mRenderer.setAngle(angle);
         requestRender();

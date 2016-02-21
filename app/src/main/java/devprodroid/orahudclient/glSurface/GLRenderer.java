@@ -13,6 +13,9 @@ import javax.microedition.khronos.opengles.GL10;
 
 import devprodroid.bluetooth.DataModel;
 
+/**
+ * Class for creation of the Surface, the vertices and cyclic drawing of the components
+ */
 public class GLRenderer implements GLSurfaceView.Renderer {
     private HorizonRight mHorizonRight;
     private HorizonLeft mHorizonLeft;
@@ -108,7 +111,9 @@ public class GLRenderer implements GLSurfaceView.Renderer {
         vertLine4.SetColor(.0f, .8f, 0f, 1.0f);
 
     }
-
+    /**
+     * Draw Frame with all components
+     */
     public void onDrawFrame(GL10 unused) {
 
         // drawHorizonFrame();
@@ -160,8 +165,6 @@ public class GLRenderer implements GLSurfaceView.Renderer {
         // Calculate the projection and view transformation
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
 
-
-
         Matrix.setRotateM(mRotationMatrixCompass, 0, mAngle, 0, 0, 1.0f);
 
         //Set Translation for attitude Marker
@@ -181,13 +184,6 @@ public class GLRenderer implements GLSurfaceView.Renderer {
         mAttitude.draw(scratch);
         mAttitudeCenter.draw(scratch);
 
-
-
-
-
-
-
-
         //Draw fixed HorizonRight
         mHorizonRight.draw();
         mHorizonLeft.draw();
@@ -202,6 +198,7 @@ public class GLRenderer implements GLSurfaceView.Renderer {
         //Draw Battery Bar, color change is done in the Battery Class
         mBattery.draw(mBatteryLevel);
 
+        //Draw helper lines
         vertLine1.draw(mMVPMatrix);
         vertLine2.draw(mMVPMatrix);
         vertLine3.draw(mMVPMatrix);
@@ -211,7 +208,6 @@ public class GLRenderer implements GLSurfaceView.Renderer {
         Matrix.setRotateM(mRotationMatrixCompass, 0, mHeading, 0, 0, 1.0f);
         Matrix.multiplyMM(scratch, 0, mMVPMatrix, 0, mRotationMatrixCompass, 0);
         mCompass.draw(scratch);
-
 
     }
 

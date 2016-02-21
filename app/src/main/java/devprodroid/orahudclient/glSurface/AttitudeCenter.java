@@ -7,7 +7,7 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 /**
- * Center of the Attitude MArker
+ * Center of the Attitude Marker
  */
 public class AttitudeCenter {
 

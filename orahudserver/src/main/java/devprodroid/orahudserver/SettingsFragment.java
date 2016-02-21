@@ -4,7 +4,7 @@ import android.os.Bundle;
 import android.preference.PreferenceFragment;
 
 /**
- * Created by robert on 17.08.15.
+Create preferences from rescource
  */
 public class SettingsFragment extends PreferenceFragment {
     @Override

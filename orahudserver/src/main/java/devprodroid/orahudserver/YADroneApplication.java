@@ -6,6 +6,9 @@ import android.app.Application;
 import de.yadrone.base.ARDrone;
 import de.yadrone.base.IARDrone;
 
+/**
+ * Application context for keeping the drone instance
+ */
 public class YADroneApplication extends Application
 {
     /**

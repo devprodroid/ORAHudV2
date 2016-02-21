@@ -41,7 +41,7 @@ import devprodroid.orahudserver.YADroneApplication;
 import devprodroid.orahudserver.control.ControlActivity;
 
 /**
- *  Activity containing the list of devices
+ *  Activity containing the list of bluetooth devices
  */
 public class ConnectionActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener, BatteryListener, WifiListener {
 

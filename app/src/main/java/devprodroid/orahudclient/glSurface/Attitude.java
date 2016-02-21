@@ -55,7 +55,9 @@ public class Attitude {
     private final int vertexCount = squareCoords.length / COORDS_PER_VERTEX;
     private final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
 
-
+    /**
+     * Draws a bar which is rotated around the centerpoint
+     */
     public Attitude() {
         // initialize vertex byte buffer for shape coordinates
         ByteBuffer bb = ByteBuffer.allocateDirect(

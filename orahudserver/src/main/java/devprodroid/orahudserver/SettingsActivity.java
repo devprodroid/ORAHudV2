@@ -4,7 +4,7 @@ import android.os.Bundle;
 import android.preference.PreferenceActivity;
 
 /**
- * Settings Screen
+ * Settings Screen and fragment manager class
  */
 public class SettingsActivity extends PreferenceActivity   {
 
